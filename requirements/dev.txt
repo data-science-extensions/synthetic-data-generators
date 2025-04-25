@@ -1,0 +1,9 @@
+black==25.*
+blacken-docs==1.*
+pre-commit==4.*
+isort==6.*
+codespell==2.*
+pyupgrade==3.*
+pylint==3.*
+pycln==2.*
+ipykernel==6.*
