@@ -124,6 +124,7 @@ pretty = true
 disable_error_code = [
     "valid-type",
     "attr-defined",
+    "no-redef",
 ]
 
 [tool.isort]
