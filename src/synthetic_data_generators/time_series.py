@@ -161,7 +161,7 @@ class TimeSeriesGenerator:
             [700, 190],
             [1096, 213],
         ),
-        level_breaks: tuple[int_list_tuple, ...] | list[int_list_tuple] = (
+        level_breaks: tuple[int_list_tuple, ...] | list[int_list_tuple] | None = (
             [250, 100],
             [650, -50],
         ),
@@ -171,7 +171,7 @@ class TimeSeriesGenerator:
         exogenous: list | None = None,
         season_conf: dict_str_any | None = {"style": "holiday"},
         season_eff: float = 0.15,
-        man_outliers: list | None = None,
+        manual_outliers: tuple[int_list_tuple, ...] | list[int_list_tuple] | None = None,
         noise_scale: float = 10,
         seed: int | None = None,
     ) -> pd.DataFrame:
@@ -180,10 +180,10 @@ class TimeSeriesGenerator:
         AR = [1] or AR
         MA = [] or MA
         exogenous = [] or exogenous
-        man_outliers = [] or man_outliers
+        manual_outliers = [] or manual_outliers
         assert AR is not None
         assert MA is not None
-        assert man_outliers is not None
+        assert manual_outliers is not None
 
         # Date index:
         dates: datetime_list = pd.date_range(start_date, periods=n_periods).to_pydatetime().tolist()
@@ -193,8 +193,9 @@ class TimeSeriesGenerator:
 
         # Structural break:
         break_effect: NDArray[np.float64] = np.zeros(n_periods).astype(np.float64)
-        for b in level_breaks:
-            break_effect[b[0] :] += b[1]
+        if level_breaks:
+            for level_break in level_breaks:
+                break_effect[level_break[0] :] += level_break[1]
 
         # ARMA(AR,MA) component:
         randomwalk: NDArray[np.float64] = self.generate_ARMA(
@@ -220,23 +221,22 @@ class TimeSeriesGenerator:
             size=n_periods,
         )
 
-        # Manual outliers:
-        if len(man_outliers) == 0:
-            outliers: NDArray[np.float64] = np.ones(n_periods)
-        else:
-            outliers: NDArray[np.float64] = np.asarray(man_outliers)
-
         # Assemble finally:
         df: pd.DataFrame = pd.DataFrame(
             list(
                 zip(
                     dates,
-                    (trend + break_effect + randomwalk + noise) * season * outliers,
+                    (trend + break_effect + randomwalk + noise) * season,
                 )
             ),
             index=dates,
             columns=["Date", "Value"],
         )
+
+        # Manual outliers:
+        if manual_outliers:
+            for manual_outlier in manual_outliers:
+                df.iloc[manual_outlier[0], 1] = manual_outlier[1]
 
         return df
 
