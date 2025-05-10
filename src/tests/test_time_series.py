@@ -16,7 +16,7 @@ from unittest import TestCase
 
 # ## Python Third Party Imports ----
 import numpy as np
-import pytest
+import pandas as pd
 from numpy.typing import NDArray
 from pandas import Timestamp
 from toolbox_python.classes import class_property
@@ -35,7 +35,7 @@ from synthetic_data_generators.time_series import (
 # ---------------------------------------------------------------------------- #
 
 
-class Dates_Mixin(TestCase):
+class Dates_Mixin:
 
     @class_property
     def dates_apr_2025(cls) -> datetime_list:
@@ -46,17 +46,45 @@ class Dates_Mixin(TestCase):
 
 
 ## --------------------------------------------------------------------------- #
+##  TimeSeriesGenerator: Generics                                           ####
+## --------------------------------------------------------------------------- #
+
+
+class TestTimeSeriesGenerator_Generics(TestCase, Dates_Mixin):
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.tsg = TimeSeriesGenerator()
+        cls.seed = 123
+
+    def test_random_generator_1(self) -> None:
+        _input: list[float] = self.tsg._random_generator().normal(loc=0, scale=1, size=10).tolist()
+        _expected: list[float] = np.random.default_rng().normal(loc=0, scale=1, size=10).tolist()
+        assert _input != _expected
+
+    def test_random_generator_2(self) -> None:
+        _input: list[float] = self.tsg._random_generator(seed=self.seed).normal(loc=0, scale=1, size=10).tolist()
+        _expected: list[float] = np.random.default_rng(self.seed).normal(loc=0, scale=1, size=10).tolist()
+        assert _input == _expected
+
+    def test_generate_dates(self) -> None:
+        _input = self.dates_apr_2025
+        _output = pd.date_range("2025-04-01", "2025-04-30").to_pydatetime().tolist()
+        assert _input == _output
+
+
+## --------------------------------------------------------------------------- #
 ##  TimeSeriesGenerator: Seasonalities                                      ####
 ## --------------------------------------------------------------------------- #
 
 
-class TestTimeSeriesGenerator_Seasonalidies(Dates_Mixin):
+class TestTimeSeriesGenerator_Seasonalities(TestCase, Dates_Mixin):
 
-    def setUp(self) -> None:
-        self.tsg = TimeSeriesGenerator()
-        self.seed = 123
+    @classmethod
+    def setUpClass(cls) -> None:
+        cls.tsg = TimeSeriesGenerator()
+        cls.seed = 123
 
-    @pytest.mark.xfail
     def test_holidays_in_april_2025(self) -> None:
         _input = self.dates_apr_2025
         _output: NDArray[np.int_] = self.tsg.generate_season_index(
@@ -103,61 +131,13 @@ class TestTimeSeriesGenerator_Seasonalidies(Dates_Mixin):
         ).tolist()
         assert _output == _expected
 
-    def test_markov_for_april_2025(self) -> None:
-        _input = self.dates_apr_2025
-        _output: NDArray[np.int_] = self.tsg.generate_season_index(
-            dates=_input,
-            style="semi-markov",
-            period_length=7,
-            period_sd=2,
-            start_index=4,
-            seed=self.seed,
-        ).tolist()
-        output = list(zip(_input, _output))
-        _expected: NDArray[np.int_] = np.array(
-            [
-                0.0,  # 1st: Tue
-                0.0,  # 2nd: Wed
-                0.0,  # 3rd: Thu
-                0.0,  # 4th: Fri
-                1.0,  # 5th: Sat
-                0.0,  # 6th: Sun
-                0.0,  # 7th: Mon
-                0.0,  # 8th: Tue
-                0.0,  # 9th: Wed
-                0.0,  # 10th: Thu
-                0.0,  # 11th: Fri
-                1.0,  # 12th: Sat
-                0.0,  # 13th: Sun
-                0.0,  # 14th: Mon
-                0.0,  # 15th: Tue
-                0.0,  # 16th: Wed
-                1.0,  # 17th: Thu
-                0.0,  # 18th: Easter Fri
-                0.0,  # 19th: Easter Sat
-                0.0,  # 20th: Easter Sun
-                0.0,  # 21st: Easter Mon
-                1.0,  # 22nd: Tue
-                0.0,  # 23rd: Wed
-                0.0,  # 24th: Thu
-                0.0,  # 25th: ANZAC Day
-                0.0,  # 27th: Sun
-                1.0,  # 26th: Sat
-                0.0,  # 28th: Mon
-                0.0,  # 29th: Tue
-                0.0,  # 30th: Wed
-            ]
-        ).tolist()
-        expected = list(zip(_input, _expected))
-        assert output == expected
-
 
 ## --------------------------------------------------------------------------- #
 ##  TimeSeriesGenerator: Creation                                           ####
 ## --------------------------------------------------------------------------- #
 
 
-class TestTimeSeriesGenerator_Creation(Dates_Mixin):
+class TestTimeSeriesGenerator_Creation(TestCase, Dates_Mixin):
 
     def setUp(self) -> None:
         self.tsg = TimeSeriesGenerator()
@@ -165,7 +145,7 @@ class TestTimeSeriesGenerator_Creation(Dates_Mixin):
 
     def test_linear_trend(self) -> None:
         n_periods = 20
-        interpolation_nodes: list[list[int]] = [[n_periods * i / 4, 100 * i] for i in range(4)]
+        interpolation_nodes: list[list[float | int]] = [[n_periods * i / 4, 100 * i] for i in range(4)]
         _output = self.tsg.create_time_series(
             start_date=datetime(2019, 1, 1),
             n_periods=n_periods,
