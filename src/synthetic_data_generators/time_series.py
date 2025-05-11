@@ -302,7 +302,7 @@ class TimeSeriesGenerator:
         randomwalk: NDArray[np.float64] = self.generate_ARMA(
             AR=AR,
             MA=MA,
-            rndwalk_scale=randomwalk_scale,
+            randomwalk_scale=randomwalk_scale,
             n_periods=n_periods,
             exogenous=exogenous,
             seed=seed,
@@ -864,7 +864,7 @@ class TimeSeriesGenerator:
         self,
         AR: list,
         MA: list,
-        rndwalk_scale: float,
+        randomwalk_scale: float,
         n_periods: int,
         exogenous: list[dict[Literal["coeff", "ts"], list[float]]] | None = None,
         seed: int | None = None,
