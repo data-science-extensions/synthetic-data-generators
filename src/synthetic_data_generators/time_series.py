@@ -24,8 +24,7 @@
 
 """
 !!! note "Summary"
-    The [`time_series`][synthetic_data_generators.time_series] module provides a class for generating synthetic time series data.
-    It includes methods for creating time series with various characteristics, such as seasonality, trends, and noise.
+    The [`time_series`][synthetic_data_generators.time_series] module provides a class for generating synthetic time series data. It includes methods for creating time series with various characteristics, such as seasonality, trends, and noise.
 """
 
 
