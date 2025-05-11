@@ -223,9 +223,13 @@
     <div class="md-grid md-typeset">
         <div class="tx-hero">
             <div class="tx-hero__image">
-                <img style="display: block; margin-left: auto; margin-right: auto; width: 100%;" alt="Python icon" src="{{ config.theme.coverpage_icon }}" draggable="false">
+                <img
+                    style="display: block; margin-left: auto; margin-right: auto; width: 100%;"
+                    alt="Python icon" src="{{ config.theme.coverpage_icon }}"
+                    draggable="false"
+                >
                 <p style="color:black; text-align:center;">(<a
-                    href="{{ config.theme.coverpage_icon }}">image source</a>)</p>
+                    href="{{ config.theme.coverpage_icon_source | url }}">image source</a>)</p>
             </div>
             <div class="tx-hero__content" style="text-align: center;">
                 <h1>{{ config.site_name }}</h1>

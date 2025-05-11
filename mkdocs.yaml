@@ -15,8 +15,10 @@ watch:
 
 theme:
   name: material
-  favicon: ./assets/images/python.svg
-  coverpage_icon: ./assets/images/python.svg
+  logo: ./assets/images/15133269.png
+  favicon: ./assets/images/15133269.png
+  coverpage_icon: ./assets/images/15133269.png
+  coverpage_icon_source: https://www.flaticon.com/free-icon/analytics_15133269
   custom_dir: docs/overrides
   palette:
     primary: blue grey
@@ -36,7 +38,6 @@ theme:
     - content.action.view
     - content.code.copy
     - content.code.annotate
-  logo: ./assets/images/python.svg
   icon:
     repo: material/gitlab
     edit: material/file-edit-outline
