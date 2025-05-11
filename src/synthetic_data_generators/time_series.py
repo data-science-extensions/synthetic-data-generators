@@ -964,7 +964,7 @@ class TimeSeriesGenerator:
                 ts[i] = ts[i] + AR[i_ar] * ts[i - 1 - i_ar]
             ts[i] = ts[i] + u[i]
             for i_ma in range(min(len(MA), i)):
-                ts[i] = ts[i] - u[i - 1 - i_ma]
+                ts[i] = ts[i] - MA[i_ma] * u[i - 1 - i_ma]
             for exvar in exogenous:
                 for i_ar in range(len(exvar["coeff"])):
                     ts[i] = ts[i] + exvar["coeff"][i_ar] * exvar["ts"][i - i_ar]
