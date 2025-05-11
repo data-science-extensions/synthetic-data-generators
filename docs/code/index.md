@@ -27,7 +27,7 @@ Tests are run in matrix against:
     1. `3.11`
     1. `3.12`
     1. `3.13`
-1. Operatign Systems:
+1. Operating Systems:
     1. `ubuntu-latest`
     1. `windows-latest`
     1. `macos-latest`
