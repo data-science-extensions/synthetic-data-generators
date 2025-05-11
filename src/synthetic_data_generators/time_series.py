@@ -143,8 +143,8 @@ class TimeSeriesGenerator:
         """
         return np.random.default_rng(seed=seed)
 
-    @lru_cache
     @staticmethod
+    @lru_cache
     def _generate_dates(start_date: datetime, end_date: datetime) -> datetime_list:
         """
         !!! note "Summary"
