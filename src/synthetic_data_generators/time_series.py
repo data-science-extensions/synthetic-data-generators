@@ -5,9 +5,28 @@
 #     Notes: This module provides functions to generate various types of       #
 #            synthetic time series data, including seasonal, trend, and noise. #
 #            It also includes functions to create time series data with        #
-#            specific characteristics, such as missing values and outliers.    #                                                      #
+#            specific characteristics, such as missing values and outliers.    #
 #                                                                              #
 # ============================================================================ #
+
+
+# ---------------------------------------------------------------------------- #
+#                                                                              #
+#     Overview                                                              ####
+#                                                                              #
+# ---------------------------------------------------------------------------- #
+
+
+## --------------------------------------------------------------------------- #
+##  Description                                                             ####
+## --------------------------------------------------------------------------- #
+
+
+"""
+!!! note "Summary"
+    The [`time_series`][synthetic_data_generators.time_series] module provides a class for generating synthetic time series data.
+    It includes methods for creating time series with various characteristics, such as seasonality, trends, and noise.
+"""
 
 
 # ---------------------------------------------------------------------------- #
@@ -84,6 +103,17 @@ Collection_of_Collection_of_datetime_or_int = Union[
 
 
 class TimeSeriesGenerator:
+    """
+    !!! note "Summary"
+        A class for generating synthetic time series data.
+
+    ???+ info "Details"
+        - This class provides methods to create synthetic time series data with various characteristics, including seasonality, trends, and noise.
+        - The generated data can be used for testing and validation purposes in time series analysis.
+        - The class includes methods to generate holiday indices, fixed error indices, semi-Markov indices, and sine indices.
+        - It also provides a method to generate polynomial trends and ARMA components.
+        - The generated time series data can be customized with different parameters, such as start date, number of periods, and noise scale.
+    """
 
     def __init__(self) -> None:
         """
@@ -175,6 +205,77 @@ class TimeSeriesGenerator:
         noise_scale: float = 10,
         seed: int | None = None,
     ) -> pd.DataFrame:
+        """
+        !!! note "Summary"
+            Generate a synthetic time series with specified characteristics.
+
+        ???+ info "Details"
+            - The function generates a time series based on the specified parameters, including start date, number of periods, interpolation nodes, level breaks, ARMA coefficients, random walk scale, exogenous variables, seasonality configuration, manual outliers, and noise scale.
+            - The generated time series is returned as a pandas DataFrame with two columns: "Date" and "Value".
+            - The "Date" column contains the dates of the time series, and the "Value" column contains the corresponding values.
+            - The function also includes options for generating seasonality indices, fixed error indices, semi-Markov indices, and sine indices.
+            - The generated time series can be customized with different parameters, such as start date, number of periods, and noise scale.
+
+        !!! warning "Important"
+            This function is designed to generate synthetic time series data for testing and validation purposes.
+            It is not intended to be used for production or real-world applications.
+
+        Params:
+            start_date (datetime):
+                The starting date for the time series.<br>
+                Default is `datetime(2019, 1, 1)`.
+            n_periods (int):
+                The number of periods for the time series.<br>
+                Default is `1096`.
+            interpolation_nodes (tuple[int_list_tuple, ...] | list[int_list_tuple]):
+                A collection of interpolation nodes, where each node is a tuple containing the x-coordinate and y-coordinate.<br>
+                The x-coordinates should be in ascending order.<br>
+                Default is `([0, 98], [300, 92], [700, 190], [1096, 213])`.
+            level_breaks (tuple[int_list_tuple, ...] | list[int_list_tuple] | None):
+                A collection of level breaks, where each break is a tuple containing the index and the value to add.<br>
+                Default is `([250, 100], [650, -50])`.
+            AR (list[float] | None):
+                The autoregressive coefficients for the ARMA model.<br>
+                Default is `None`.
+            MA (list[float] | None):
+                The moving average coefficients for the ARMA model.<br>
+                Default is `None`.
+            randomwalk_scale (float):
+                The scale of the random walk component.<br>
+                Default is `2`.
+            exogenous (list | None):
+                A list of exogenous variables to include in the ARMA model.<br>
+                Default is `None`.
+            season_conf (dict_str_any | None):
+                A dictionary containing the configuration for seasonality.<br>
+                Default is `{"style": "holiday"}`.
+            season_eff (float):
+                The effectiveness of the seasonality component.<br>
+                Default is `0.15`.
+            manual_outliers (tuple[int_list_tuple, ...] | list[int_list_tuple] | None):
+                A collection of manual outliers, where each outlier is a tuple containing the index and the value to set.<br>
+                Default is `None`.
+            noise_scale (float):
+                The scale of the noise component.<br>
+                Default is `10`.
+            seed (int | None):
+                The random seed for reproducibility.<br>
+                Default is `None`.
+
+        Raises:
+            (TypeCheckError):
+                If any of the inputs parsed to the parameters of this function are not the correct type. Uses the [`@typeguard.typechecked`](https://typeguard.readthedocs.io/en/stable/api.html#typeguard.typechecked) decorator.
+            (AssertionError):
+                If `interpolation_nodes` does not contain exactly two elements.
+            (TypeError):
+                If the first element of `interpolation_nodes` is not a `datetime`, or the second element is not an `int`.
+
+        Returns:
+            (pd.DataFrame):
+                A pandas DataFrame containing the generated time series data.
+                The DataFrame has two columns: "Date" and "Value".
+                The "Date" column contains the dates of the time series, and the "Value" column contains the corresponding values.
+        """
 
         # Validations
         AR = [1] or AR
@@ -468,6 +569,35 @@ class TimeSeriesGenerator:
         period_length: int = 7,
         start_index: int = 4,
     ) -> NDArray[np.float64]:
+        """
+        !!! note "Summary"
+            Generate a sine seasonality index for the given dates.
+
+        ???+ info "Details"
+            - A sine seasonality index is a periodic function that oscillates between `0` and `1`.
+            - It is used to model seasonal patterns in time series data.
+            - The return array is a sine wave of length `n_periods`, with a period of `period_length` and a phase shift of `start_index`.
+            - The result can be used to represent seasonal patterns in time series data, such as daily or weekly cycles.
+
+        Params:
+            dates (datetime_list_tuple):
+                List of datetime objects representing the dates to check.
+            period_length (int):
+                The length of the period for seasonality.<br>
+                For example, if the frequency is weekly, this would be `7`.<br>
+                Default is `7`.
+            start_index (int):
+                The starting index for the seasonality. Designed to account for seasonal patterns that start at a different point in time.<br>
+                Default is `4`.
+
+        Raises:
+            (TypeCheckError):
+                If any of the inputs parsed to the parameters of this function are not the correct type. Uses the [`@typeguard.typechecked`](https://typeguard.readthedocs.io/en/stable/api.html#typeguard.typechecked) decorator.
+
+        Returns:
+            (NDArray[np.float64]):
+                An array of the same length as `dates`, where each element is a sine value representing the seasonal pattern.
+        """
         n_periods: int = len(dates)
         events = (np.sin((np.arange(n_periods) - start_index) / period_length * 2 * np.pi) + 1) / 2
         return events
@@ -478,6 +608,35 @@ class TimeSeriesGenerator:
         period_length: int = 7,
         start_index: int = 4,
     ) -> NDArray[np.float64]:
+        """
+        !!! note "Summary"
+            Generate a sine seasonality index with covariance for the given dates.
+
+        ???+ info "Details"
+            - A sine seasonality index with covariance is a periodic function that oscillates between `0` and `1`.
+            - It is used to model seasonal patterns in time series data, taking into account the covariance structure of the data.
+            - The return array is a sine wave of length `n_periods`, with a period of `period_length` and a phase shift of `start_index`.
+            - The result can be used to represent seasonal patterns in time series data, such as daily or weekly cycles.
+
+        Params:
+            dates (datetime_list_tuple):
+                List of datetime objects representing the dates to check.
+            period_length (int):
+                The length of the period for seasonality.<br>
+                For example, if the frequency is weekly, this would be `7`.<br>
+                Default is `7`.
+            start_index (int):
+                The starting index for the seasonality. Designed to account for seasonal patterns that start at a different point in time.<br>
+                Default is `4`.
+
+        Raises:
+            (TypeCheckError):
+                If any of the inputs parsed to the parameters of this function are not the correct type. Uses the [`@typeguard.typechecked`](https://typeguard.readthedocs.io/en/stable/api.html#typeguard.typechecked) decorator.
+
+        Returns:
+            (NDArray[np.float64]):
+                An array of the same length as `dates`, where each element is a sine value representing the seasonal pattern.
+        """
         n_periods: int = len(dates)
         covar_wave = (np.sin((np.arange(n_periods) - start_index) / period_length / 6 * np.pi) + 2) / 2
         dx: NDArray[np.float64] = np.full_like(covar_wave, 0.4)
@@ -501,6 +660,67 @@ class TimeSeriesGenerator:
         seed: int | None = None,
         verbose: bool = False,
     ) -> NDArray[np.float64]:
+        """
+        !!! note "Summary"
+            Generate a seasonality index for the given dates based on the specified style.
+
+        ???+ info "Details"
+            - A seasonality index is a manual selection for date in `dates` to determine whether it is a holiday or not.
+            - Basically, it is a manual index of dates in a univariate time series data set which are actual holidays.
+            - The return array is generated by checking if each date in `dates` is present in the list of holiday dates generated from `season_dates`.
+            - The return array is a boolean `1` or `0` of length `n_periods`. It will have a seasonality of `period_length` and a disturbance standard deviation of `period_sd`. The result can be used as a non-uniform distribution of weekdays in a histogram (if for eg. frequency is weekly).
+
+        Params:
+            dates (datetime_list_tuple):
+                List of datetime objects representing the dates to check.
+            style (Literal):
+                The style of the seasonality index to generate.<br>
+                Possible values are:
+                - `"fixed+error"`: Fixed error seasonality index.
+                - `"semi-markov"`: Semi-Markov seasonality index.
+                - `"holiday"`: Holiday seasonality index.
+                - `"sin"`: Sine seasonality index.
+                - `"sin_covar"`: Sine seasonality index with covariance.
+            season_dates (Collection_of_Collection_of_datetime_or_int | None):
+                Collection of collections containing holiday dates and their respective periods.<br>
+                Each element in the collection should contain exactly two elements: a datetime object and an integer representing the number of periods.<br>
+                Some example inputs include:\n
+                - List of lists containing datetime and periods: `season_dates = [[datetime(2025, 4, 18), 4], [datetime(2024, 3, 29), 4]]`
+                - List of tuples containing datetime and periods: `season_dates = [(datetime(2025, 4, 18), 4), (datetime(2024, 3, 29), 4)]`
+                - Tuple of lists containing datetime and periods: `season_dates = ([datetime(2025, 4, 18), 4], [datetime(2024, 3, 29), 4])`
+                - Tuple of tuples containing datetime and periods: `season_dates = ((datetime(2025, 4, 18), 4), (datetime(2024, 3, 29), 4))`
+            period_length (int | None):
+                The length of the period for seasonality.<br>
+                For example, if the frequency is weekly, this would be `7`.<br>
+                Default is `7`.
+            period_sd (float | None):
+                The standard deviation of the disturbance.<br>
+                Default is `0.5`.
+            start_index (int | None):
+                The starting index for the seasonality.<br>
+                Default is `4`.
+            seed (int | None):
+                Random seed for reproducibility.<br>
+                Default is `None`.
+            verbose (bool):
+                If `True`, print additional information about the generated indices. Helpful for debugging.<br>
+                Default is `False`.
+
+        Raises:
+            (TypeCheckError):
+                If any of the inputs parsed to the parameters of this function are not the correct type. Uses the [`@typeguard.typechecked`](https://typeguard.readthedocs.io/en/stable/api.html#typeguard.typechecked) decorator.
+            (AssertionError):
+                If `season_dates` does not contain exactly two elements.
+            (TypeError):
+                If the first element of `season_dates` is not a `datetime`, or the second element is not an `int`.
+            (ValueError):
+                If `style` is not one of the supported styles.
+                If `period_length`, `period_sd`, or `start_index` are not provided for the corresponding styles.
+
+        Returns:
+            (NDArray[np.float64]):
+                An array of the same length as `dates`, where each element is a sine value representing the seasonal pattern.
+        """
         if "fixed" in style and "error" in style:
             assert period_length is not None
             assert period_sd is not None
@@ -540,7 +760,41 @@ class TimeSeriesGenerator:
             return np.zeros(len(dates)).astype(np.float64)
 
     def generate_polynom_trend(self, interpol_nodes, n_periods: int) -> NDArray[np.float64]:
-        # implemented only up to order 3 (cubic interpolation = four nodes)
+        """
+        !!! note "Summary"
+            Generate a polynomial trend based on the provided interpolation nodes.
+
+        ???+ info "Details"
+            - The polynomial trend is generated using the provided interpolation nodes.
+            - The function supports polynomial trends of order 1 (linear), 2 (quadratic), 3 (cubic), and 4 (quartic).
+            - The generated trend is an array of the same length as `n_periods`, where each element represents the value of the polynomial trend at that period.
+            - The function uses numpy's linear algebra solver to compute the coefficients of the polynomial based on the provided interpolation nodes.
+
+        !!! warning "Important"
+            This function is implemented only up to order 3 (cubic interpolation = four nodes).
+            It is not intended to be used for higher-order polynomial trends.
+
+        Params:
+            interpol_nodes (tuple[int_list_tuple, ...] | list[int_list_tuple]):
+                A collection of interpolation nodes, where each node is a tuple containing the x-coordinate and y-coordinate.
+                The x-coordinates should be in ascending order.
+            n_periods (int):
+                The number of periods for which to generate the polynomial trend.
+                This determines the length of the output array.
+                The generated trend will have the same length as `n_periods`.
+
+        Raises:
+            (TypeCheckError):
+                If any of the inputs parsed to the parameters of this function are not the correct type. Uses the [`@typeguard.typechecked`](https://typeguard.readthedocs.io/en/stable/api.html#typeguard.typechecked) decorator.
+            (AssertionError):
+                If `interpol_nodes` does not contain exactly two elements.
+            (TypeError):
+                If the first element of `interpol_nodes` is not a `datetime`, or the second element is not an `int`.
+
+        Returns:
+            (NDArray[np.float64]):
+                An array of the same length as `n_periods`, where each element represents the value of the polynomial trend at that period.
+        """
 
         if len(interpol_nodes) == 0:
             # No trend component:
@@ -615,9 +869,86 @@ class TimeSeriesGenerator:
         exogenous: list[dict[Literal["coeff", "ts"], list[float]]] | None = None,
         seed: int | None = None,
     ) -> NDArray[np.float64]:
+        """
+        !!! note "Summary"
+            Generate an ARMA (AutoRegressive Moving Average) time series.
 
-        exogenous = [] or exogenous
-        assert exogenous is not None
+        ???+ info "Details"
+            - The ARMA model is a combination of autoregressive (AR) and moving average (MA) components.
+            - The function generates a time series based on the specified AR and MA coefficients, random walk scale, and optional exogenous variables.
+            - The generated time series is an array of the same length as `n_periods`, where each element represents the value of the ARMA time series at that period.
+            - The function uses numpy's random number generator to generate the noise component of the ARMA model.
+
+        Params:
+            AR (list[float]):
+                List of autoregressive coefficients.
+                The length of the list determines the order of the AR component.
+                All values must be between `0` and `1`.
+            MA (list[float]):
+                List of moving average coefficients.
+                The length of the list determines the order of the MA component.
+                All values must be between `0` and `1`.
+            randomwalk_scale (float):
+                Scale parameter for the random walk component.
+                This controls the standard deviation of the noise added to the time series.
+            n_periods (int):
+                The number of periods for which to generate the ARMA time series.
+                This determines the length of the output array.
+            exogenous (list[dict[Literal["coeff", "ts"], list[float]]] | None):
+                Optional list of exogenous variables, where each variable is represented as a dictionary with keys "coeff" and "ts".
+                "coeff" is a list of coefficients for the exogenous variable, and "ts" is a list of values for that variable.
+            seed (int | None):
+                Random seed for reproducibility.<br>
+                Default is `None`.
+
+        Raises:
+            (TypeCheckError):
+                If any of the inputs parsed to the parameters of this function are not the correct type. Uses the [`@typeguard.typechecked`](https://typeguard.readthedocs.io/en/stable/api.html#typeguard.typechecked) decorator.
+
+        Returns:
+            (NDArray[np.float64]):
+                An array of the same length as `n_periods`, where each element represents the value of the ARMA time series at that period.
+
+        ???+ info "Details about how the `AR` and `MA` Parameters work"
+
+            This [`#!py generate_ARMA()`][synthetic_data_generators.time_series.TimeSeriesGenerator.generate_ARMA] method creates time series data using ARMA (AutoRegressive Moving Average) models.
+            The `#!py AR` parameter is used to model the long-term trends in the data, while the `#!py MA` parameter is used to model the short-term fluctuations.
+
+            **The `AR` (AutoRegressive) Parameter:**
+
+            - The `#!py AR` parameter is a list of coefficients that determine how much past values influence the current value.
+            - Each coefficient represents the weight given to a specific lag (previous time point).
+            - For example, with `#!py AR=[0.6, 0.3]`:
+                - The value at time `#!py t` is influenced by:
+                - 60% of the value at time `#!py t-1` (0.6 x previous value)
+                - 30% of the value at time `#!py t-2` (0.3 x value from two periods ago)
+            - This creates persistence in the data where values tend to follow past trends. Higher AR values (closer to `#!py 1`) create stronger trends and more correlation with past values.
+            - Higher AR values (closer to `#!py 1`) create stronger trends and more correlation with past values.
+            - When `#!py AR=[0]`, the time series is purely random, as it does not depend on past values. Likewise, when `#!py AR=[1]`, the time series is the same as a random walk, as it only depends on the previous value.
+            - When multiple values are provided, the first value is the most recent, and the last value is the oldest. For example, `#!py AR=[0.5, 0.3]` means that the most recent value has a weight of `0.5`, and the second most recent value has a weight of `0.3`. Realistically, the second most recent value will have less influence than the most recent value, and will therefore have a lower value (closer to `#!py 0`), but it can still affect the current value.
+
+            **The `#!py MA` (Moving Average) Parameter:**
+
+            - The MA parameter is a list of coefficients that determine how much past random shocks (errors) influence the current value.
+            - For example, with `#!py MA=[0.2, 0.1]`:
+                - The value at time `#!py t` is influenced by:
+                - 20% of the random shock at time `#!py t-1`
+                - 10% of the random shock at time `#!py t-2`
+            - This creates short-term corrections or adjustments based on recent random fluctuations.
+            - Higher MA values (closer to `#!py 1`) create stronger corrections and more correlation with past shocks.
+            - When `#!py MA=[0]`, the time series is purely autoregressive, as it will depend on past values and does not depend on past shocks. Likewise, when `#!py MA=[1]`, the time series is purely random and will not depend on previous values.
+            - When multiple values are provided, the first value is the most recent, and the last value is the oldest. For example, `#!py MA=[0.5, 0.3]` means that the most recent value has a weight of `0.5`, and the second most recent value has a weight of `0.3`. Realistically, the second most recent value will have less influence than the most recent value, and will therefore have a lower value (closer to `#!py 0`), but it can still affect the current value.
+
+            **Examples and Effects:**
+
+            | Value                                | Description |
+            |--------------------------------------|-------------|
+            | `#!py AR=[0.9]`                      | Creates strong persistence - values strongly follow the previous value, resulting in smooth, trending data |
+            | `#!py AR=[0.5,0.3]`                  | Creates moderate persistence with some oscillation patterns |
+            | `#!py MA=[0.8]`                      | Creates immediate corrections after random shocks |
+            | `#!py MA=[0.5,0.3]`                  | Creates moderate corrections with some oscillation patterns |
+            | `#!py AR=[0.7]` <br> `#!py MA=[0.4]` | Combines trend persistence with short-term corrections |
+        """
 
         # Noise
         u: NDArray[np.float64] = self._random_generator(seed=seed).normal(
