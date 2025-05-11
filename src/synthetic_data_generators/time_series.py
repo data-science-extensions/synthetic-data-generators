@@ -413,7 +413,7 @@ class TimeSeriesGenerator:
         period_sd: float = 0.5,
         start_index: int = 4,
         seed: int | None = None,
-    ) -> NDArray[np.int_]:
+    ) -> NDArray[np.float64]:
         """
         !!! note "Summary"
             Generate a fixed error seasonality index for the given dates.
@@ -455,14 +455,13 @@ class TimeSeriesGenerator:
         n_periods: int = len(dates)
         events: NDArray[np.int_] = np.zeros(n_periods).astype(np.int_)
         event_inds: NDArray[Any] = np.arange(n_periods // period_length + 1) * period_length + start_index
-        disturbance: NDArray[np.int_] = (
+        disturbance: NDArray[np.float64] = (
             self._random_generator(seed=seed)
             .normal(
                 loc=0.0,
                 scale=period_sd,
                 size=len(event_inds),
             )
-            .round()
             .astype(int)
         )
         event_inds = event_inds + disturbance
@@ -471,11 +470,8 @@ class TimeSeriesGenerator:
         if np.any(event_inds >= n_periods):
             event_inds = np.delete(event_inds, event_inds >= n_periods)
 
-        # For any indices defined above, assign `1` to the events array
-        events[event_inds] = 1
-
         # Return
-        return events.astype(np.int_)
+        return events.astype(np.float64)
 
     def generate_semi_markov_index(
         self,
