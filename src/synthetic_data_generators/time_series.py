@@ -964,6 +964,7 @@ class TimeSeriesGenerator:
             bool:
                 True if the value is between the minimum and maximum values, False otherwise.
         """
+        assert min_value <= max_value
         return min_value <= value <= max_value
 
     def _assert_value_is_between(
