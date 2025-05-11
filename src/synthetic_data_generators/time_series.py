@@ -949,6 +949,12 @@ class TimeSeriesGenerator:
             | `#!py MA=[0.5,0.3]`                  | Creates moderate corrections with some oscillation patterns |
             | `#!py AR=[0.7]` <br> `#!py MA=[0.4]` | Combines trend persistence with short-term corrections |
         """
+
+        # Validations
+        AR = AR or [1]
+        MA = MA or [0]
+        exogenous = exogenous or []
+        assert exogenous is not None
         self._assert_all_values_are_between(AR, min_value=0, max_value=1)
         self._assert_all_values_are_between(MA, min_value=0, max_value=1)
 
@@ -958,7 +964,7 @@ class TimeSeriesGenerator:
             scale=randomwalk_scale,
             size=n_periods,
         )
-        ts = np.zeros(n_periods)
+        ts: NDArray[np.float64] = np.zeros(n_periods).astype(np.float64)
         for i in range(n_periods):
             for i_ar in range(min(len(AR), i)):
                 ts[i] = ts[i] + AR[i_ar] * ts[i - 1 - i_ar]
@@ -1018,7 +1024,7 @@ class TimeSeriesGenerator:
 
     def _all_values_are_between(
         self,
-        values: Union[list[float], tuple[float, ...]],
+        values: list[float] | tuple[float, ...],
         min_value: float,
         max_value: float,
     ) -> bool:
@@ -1041,7 +1047,7 @@ class TimeSeriesGenerator:
 
     def _assert_all_values_are_between(
         self,
-        values: Union[list[float], tuple[float, ...]],
+        values: list[float] | tuple[float, ...],
         min_value: float,
         max_value: float,
     ) -> None:
