@@ -413,7 +413,6 @@ class TimeSeriesGenerator:
         period_sd: float = 0.5,
         start_index: int = 4,
         seed: int | None = None,
-        verbose: bool = False,
     ) -> NDArray[np.int_]:
         """
         !!! note "Summary"
@@ -442,9 +441,6 @@ class TimeSeriesGenerator:
             start_index (int):
                 The starting index for the seasonality.<br>
                 Default is `4`.
-            verbose (bool):
-                If `True`, print additional information about the generated indices. Helpful for debugging.<br>
-                Default is `False`.
 
         Raises:
             (TypeCheckError):
@@ -478,13 +474,6 @@ class TimeSeriesGenerator:
         # For any indices defined above, assign `1` to the events array
         events[event_inds] = 1
 
-        # Check debugging
-        if verbose:
-            print(f"Disturbance: {disturbance}")
-            print(f"Event indices: {event_inds}")
-            print(f"Weekdays: {np.mod(event_inds, period_length)}")
-            print(f"Histogram: {np.histogram(np.mod(event_inds, period_length), bins=np.arange(period_length))}")
-
         # Return
         return events.astype(np.int_)
 
@@ -495,7 +484,6 @@ class TimeSeriesGenerator:
         period_sd: float = 0.5,
         start_index: int = 4,
         seed: int | None = None,
-        verbose: bool = False,
     ) -> NDArray[np.int_]:
         """
         !!! note "Summary"
@@ -519,9 +507,6 @@ class TimeSeriesGenerator:
             start_index (int):
                 The starting index for the seasonality.<br>
                 Default is `4`.
-            verbose (bool):
-                If `True`, print additional information about the generated indices. Helpful for debugging.<br>
-                Default is `False`.
 
         Raises:
             (TypeCheckError):
@@ -552,12 +537,6 @@ class TimeSeriesGenerator:
 
         # For any indices defined above, assign `1` to the events array
         events[event_indexes] = 1
-
-        # Check debugging
-        if verbose:
-            print(f"Event indices: {event_inds}")
-            print(f"Weekdays: {np.mod(event_inds, period_length)}")
-            print(f"Histogram: {np.histogram(np.mod(event_inds, period_length), bins=np.arange(period_length))}")
 
         # Return
         return events
@@ -657,7 +636,6 @@ class TimeSeriesGenerator:
         period_sd: float | None = None,
         start_index: int | None = None,
         seed: int | None = None,
-        verbose: bool = False,
     ) -> NDArray[np.float64]:
         """
         !!! note "Summary"
@@ -701,9 +679,6 @@ class TimeSeriesGenerator:
             seed (int | None):
                 Random seed for reproducibility.<br>
                 Default is `None`.
-            verbose (bool):
-                If `True`, print additional information about the generated indices. Helpful for debugging.<br>
-                Default is `False`.
 
         Raises:
             (TypeCheckError):
@@ -730,7 +705,6 @@ class TimeSeriesGenerator:
                 period_sd=period_sd,
                 start_index=start_index,
                 seed=seed,
-                verbose=verbose,
             ).astype(np.float64)
         elif "semi" in style and "markov" in style:
             assert period_length is not None
@@ -742,7 +716,6 @@ class TimeSeriesGenerator:
                 period_sd=period_sd,
                 start_index=start_index,
                 seed=seed,
-                verbose=verbose,
             ).astype(np.float64)
         elif style == "holiday":
             assert season_dates is not None
