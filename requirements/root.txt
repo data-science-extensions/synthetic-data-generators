@@ -2,3 +2,4 @@ typeguard==4.*
 more-itertools==10.*
 pandas==2.*
 numpy==2.*
+toolbox-python==1.*

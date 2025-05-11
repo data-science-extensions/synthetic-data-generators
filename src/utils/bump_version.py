@@ -43,9 +43,7 @@ from toolbox_python.dictionaries import DotDict
 
 ### Set up argument parsing ----
 parser = argparse.ArgumentParser(description="Bump version in files.")
-parser.add_argument(
-    "-v", "--verbose", default=False, type=bool, help="Enable verbose output."
-)
+parser.add_argument("-v", "--verbose", default=False, type=bool, help="Enable verbose output.")
 parser.add_argument("version", type=str, help="The new version to set in the files.")
 
 ### Parse the arguments ----
@@ -111,9 +109,7 @@ for file in files:
     new_content: list[str] = []
     for line in content.splitlines():
         if re.search(search_pattern, line):
-            new_line: str = re.sub(
-                search_pattern, pattern.replace("{VERSION}", args.version), line
-            )
+            new_line: str = re.sub(search_pattern, pattern.replace("{VERSION}", args.version), line)
             new_content.append(new_line)
             if args.verbose:
                 print(f"-- old--> {line}")

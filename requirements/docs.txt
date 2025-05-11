@@ -2,6 +2,7 @@ mkdocs==1.*
 mkdocs-material==9.*
 mkdocs-coverage==1.*
 mkdocs-autorefs==1.*
+mkdocs-jupyter==0.*
 mkdocstrings==0.*
 mkdocstrings-python==1.*
 livereload==2.*

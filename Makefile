@@ -111,7 +111,7 @@ lint: run-black run-isort
 check-black:
 	uv run --link-mode=copy black --diff --check --config pyproject.toml ./
 check-mypy:
-	uv run --link-mode=copy mypy --install-types --config-file pyproject.toml src/$(PACKAGE_NAME)
+	uv run --link-mode=copy mypy --install-types --config-file=pyproject.toml src/$(PACKAGE_NAME)
 check-isort:
 	uv run --link-mode=copy isort --settings-file pyproject.toml ./
 check-codespell:

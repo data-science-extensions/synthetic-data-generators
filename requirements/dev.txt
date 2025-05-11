@@ -7,3 +7,5 @@ pyupgrade==3.*
 pylint==3.*
 pycln==2.*
 ipykernel==6.*
+plotly==6.*
+nbformat==5.*
