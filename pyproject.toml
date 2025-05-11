@@ -140,6 +140,7 @@ lines_after_imports = 2
 
 [tool.codespell]
 ignore-words-list = "demog"
+skip = "*.html"
 
 [tool.pylint.main]
 exit-zero = false
