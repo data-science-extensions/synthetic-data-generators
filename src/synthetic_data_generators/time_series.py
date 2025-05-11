@@ -278,10 +278,10 @@ class TimeSeriesGenerator:
         """
 
         # Validations
-        AR = [1] or AR
-        MA = [] or MA
-        exogenous = [] or exogenous
-        manual_outliers = [] or manual_outliers
+        AR = AR or [1]
+        MA = MA or [0]
+        exogenous = exogenous or []
+        manual_outliers = manual_outliers or []
         assert AR is not None
         assert MA is not None
         assert manual_outliers is not None
