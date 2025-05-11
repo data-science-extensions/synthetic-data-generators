@@ -949,6 +949,8 @@ class TimeSeriesGenerator:
             | `#!py MA=[0.5,0.3]`                  | Creates moderate corrections with some oscillation patterns |
             | `#!py AR=[0.7]` <br> `#!py MA=[0.4]` | Combines trend persistence with short-term corrections |
         """
+        self._assert_all_values_are_between(AR, min_value=0, max_value=1)
+        self._assert_all_values_are_between(MA, min_value=0, max_value=1)
 
         # Noise
         u: NDArray[np.float64] = self._random_generator(seed=seed).normal(
@@ -967,3 +969,99 @@ class TimeSeriesGenerator:
                 for i_ar in range(len(exvar["coeff"])):
                     ts[i] = ts[i] + exvar["coeff"][i_ar] * exvar["ts"][i - i_ar]
         return ts
+
+    ## --------------------------------------------------------------------------- #
+    ##  Validators                                                              ####
+    ## --------------------------------------------------------------------------- #
+
+    def _value_is_between(self, value: float, min_value: float, max_value: float) -> bool:
+        """
+        Check if a value is between two other values.
+
+        Params:
+            value (float):
+                The value to check.
+            min_value (float):
+                The minimum value.
+            max_value (float):
+                The maximum value.
+
+        Returns:
+            bool:
+                True if the value is between the minimum and maximum values, False otherwise.
+        """
+        return min_value <= value <= max_value
+
+    def _assert_value_is_between(
+        self,
+        value: float,
+        min_value: float,
+        max_value: float,
+    ) -> None:
+        """
+        Assert that a value is between two other values.
+
+        Params:
+            value (float):
+                The value to check.
+            min_value (float):
+                The minimum value.
+            max_value (float):
+                The maximum value.
+
+        Raises:
+            AssertionError:
+                If the value is not between the minimum and maximum values.
+        """
+        if not self._value_is_between(value, min_value, max_value):
+            raise AssertionError(f"Value must be between `{min_value}` and `{max_value}`: `{value}`")
+
+    def _all_values_are_between(
+        self,
+        values: Union[list[float], tuple[float, ...]],
+        min_value: float,
+        max_value: float,
+    ) -> bool:
+        """
+        Check if all values in an array are between two other values.
+
+        Params:
+            values (Union[list[float], tuple[float, ...]]):
+                The array of values to check.
+            min_value (float):
+                The minimum value.
+            max_value (float):
+                The maximum value.
+
+        Returns:
+            bool:
+                True if all values are between the minimum and maximum values, False otherwise.
+        """
+        return all(self._value_is_between(value, min_value, max_value) for value in values)
+
+    def _assert_all_values_are_between(
+        self,
+        values: Union[list[float], tuple[float, ...]],
+        min_value: float,
+        max_value: float,
+    ) -> None:
+        """
+        Assert that all values in an array are between two other values.
+
+        Params:
+            values (Union[list[float], tuple[float, ...]]):
+                The array of values to check.
+            min_value (float):
+                The minimum value.
+            max_value (float):
+                The maximum value.
+
+        Raises:
+            AssertionError:
+                If any value is not between the minimum and maximum values.
+        """
+        values_not_between: list[float] = [
+            value for value in values if not self._value_is_between(value, min_value, max_value)
+        ]
+        if not len(values_not_between) == 0:
+            raise AssertionError(f"Values not between `{min_value}` and `{max_value}`: {values_not_between}")
