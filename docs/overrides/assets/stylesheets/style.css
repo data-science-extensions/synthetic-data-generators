@@ -54,3 +54,15 @@ article div.doc-class {
 .md-typeset table:not([class]) td {
     padding: .2em .5em !important;
 }
+
+
+/* When displaying a list of items, add space between the last item and the next element, but not a space between items in the list */
+.md-typeset > ol > li:last-child,
+.md-typeset > ul > li:last-child,
+.md-typeset div > ol > li:last-child,
+.md-typeset div > ul > li:last-child {
+    margin-bottom: 0.5em;
+}
+.md-typeset ol li, .md-typeset ul li {
+    margin-bottom: 0em;
+}
