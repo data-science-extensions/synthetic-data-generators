@@ -195,10 +195,10 @@ class TimeSeriesGenerator:
             [250, 100],
             [650, -50],
         ),
-        AR: list | None = None,
-        MA: list | None = None,
+        AR: list[float] | None = None,
+        MA: list[float] | None = None,
         randomwalk_scale: float = 2,
-        exogenous: list | None = None,
+        exogenous: list[dict[Literal["coeff", "ts"], list[float]]] | None = None,
         season_conf: dict_str_any | None = {"style": "holiday"},
         season_eff: float = 0.15,
         manual_outliers: tuple[int_list_tuple, ...] | list[int_list_tuple] | None = None,
@@ -243,7 +243,7 @@ class TimeSeriesGenerator:
             randomwalk_scale (float):
                 The scale of the random walk component.<br>
                 Default is `2`.
-            exogenous (list | None):
+            exogenous (list[dict[Literal["coeff", "ts"], list[float]]] | None):
                 A list of exogenous variables to include in the ARMA model.<br>
                 Default is `None`.
             season_conf (dict_str_any | None):
@@ -862,8 +862,8 @@ class TimeSeriesGenerator:
 
     def generate_ARMA(
         self,
-        AR: list,
-        MA: list,
+        AR: list[float],
+        MA: list[float],
         randomwalk_scale: float,
         n_periods: int,
         exogenous: list[dict[Literal["coeff", "ts"], list[float]]] | None = None,
@@ -953,7 +953,7 @@ class TimeSeriesGenerator:
         # Noise
         u: NDArray[np.float64] = self._random_generator(seed=seed).normal(
             loc=0.0,
-            scale=rndwalk_scale,
+            scale=randomwalk_scale,
             size=n_periods,
         )
         ts = np.zeros(n_periods)
