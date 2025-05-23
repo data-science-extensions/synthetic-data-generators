@@ -413,8 +413,7 @@ class TimeSeriesGenerator:
         period_sd: float = 0.5,
         start_index: int = 4,
         seed: int | None = None,
-        verbose: bool = False,
-    ) -> NDArray[np.int_]:
+    ) -> NDArray[np.float64]:
         """
         !!! note "Summary"
             Generate a fixed error seasonality index for the given dates.
@@ -442,9 +441,6 @@ class TimeSeriesGenerator:
             start_index (int):
                 The starting index for the seasonality.<br>
                 Default is `4`.
-            verbose (bool):
-                If `True`, print additional information about the generated indices. Helpful for debugging.<br>
-                Default is `False`.
 
         Raises:
             (TypeCheckError):
@@ -459,14 +455,13 @@ class TimeSeriesGenerator:
         n_periods: int = len(dates)
         events: NDArray[np.int_] = np.zeros(n_periods).astype(np.int_)
         event_inds: NDArray[Any] = np.arange(n_periods // period_length + 1) * period_length + start_index
-        disturbance: NDArray[np.int_] = (
+        disturbance: NDArray[np.float64] = (
             self._random_generator(seed=seed)
             .normal(
                 loc=0.0,
                 scale=period_sd,
                 size=len(event_inds),
             )
-            .round()
             .astype(int)
         )
         event_inds = event_inds + disturbance
@@ -475,18 +470,8 @@ class TimeSeriesGenerator:
         if np.any(event_inds >= n_periods):
             event_inds = np.delete(event_inds, event_inds >= n_periods)
 
-        # For any indices defined above, assign `1` to the events array
-        events[event_inds] = 1
-
-        # Check debugging
-        if verbose:
-            print(f"Disturbance: {disturbance}")
-            print(f"Event indices: {event_inds}")
-            print(f"Weekdays: {np.mod(event_inds, period_length)}")
-            print(f"Histogram: {np.histogram(np.mod(event_inds, period_length), bins=np.arange(period_length))}")
-
         # Return
-        return events.astype(np.int_)
+        return events.astype(np.float64)
 
     def generate_semi_markov_index(
         self,
@@ -495,7 +480,6 @@ class TimeSeriesGenerator:
         period_sd: float = 0.5,
         start_index: int = 4,
         seed: int | None = None,
-        verbose: bool = False,
     ) -> NDArray[np.int_]:
         """
         !!! note "Summary"
@@ -519,9 +503,6 @@ class TimeSeriesGenerator:
             start_index (int):
                 The starting index for the seasonality.<br>
                 Default is `4`.
-            verbose (bool):
-                If `True`, print additional information about the generated indices. Helpful for debugging.<br>
-                Default is `False`.
 
         Raises:
             (TypeCheckError):
@@ -552,12 +533,6 @@ class TimeSeriesGenerator:
 
         # For any indices defined above, assign `1` to the events array
         events[event_indexes] = 1
-
-        # Check debugging
-        if verbose:
-            print(f"Event indices: {event_inds}")
-            print(f"Weekdays: {np.mod(event_inds, period_length)}")
-            print(f"Histogram: {np.histogram(np.mod(event_inds, period_length), bins=np.arange(period_length))}")
 
         # Return
         return events
@@ -657,7 +632,6 @@ class TimeSeriesGenerator:
         period_sd: float | None = None,
         start_index: int | None = None,
         seed: int | None = None,
-        verbose: bool = False,
     ) -> NDArray[np.float64]:
         """
         !!! note "Summary"
@@ -701,9 +675,6 @@ class TimeSeriesGenerator:
             seed (int | None):
                 Random seed for reproducibility.<br>
                 Default is `None`.
-            verbose (bool):
-                If `True`, print additional information about the generated indices. Helpful for debugging.<br>
-                Default is `False`.
 
         Raises:
             (TypeCheckError):
@@ -730,7 +701,6 @@ class TimeSeriesGenerator:
                 period_sd=period_sd,
                 start_index=start_index,
                 seed=seed,
-                verbose=verbose,
             ).astype(np.float64)
         elif "semi" in style and "markov" in style:
             assert period_length is not None
@@ -742,7 +712,6 @@ class TimeSeriesGenerator:
                 period_sd=period_sd,
                 start_index=start_index,
                 seed=seed,
-                verbose=verbose,
             ).astype(np.float64)
         elif style == "holiday":
             assert season_dates is not None
@@ -995,6 +964,10 @@ class TimeSeriesGenerator:
             bool:
                 True if the value is between the minimum and maximum values, False otherwise.
         """
+        if min_value > max_value:
+            raise ValueError(
+                f"Invalid range: `min_value` ({min_value}) must be less than or equal to `max_value` ({max_value})."
+            )
         return min_value <= value <= max_value
 
     def _assert_value_is_between(

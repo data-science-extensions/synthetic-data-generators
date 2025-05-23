@@ -246,7 +246,7 @@ If we increase the `#!py noise_scale`, then that will widen the standard deviati
     3. No seasonality
 
 
-## Randomwalk
+## Random Walk
 
 The random walk is a random process that describes a path consisting of a succession of random steps. It utilises a randomisation parameter around the normal distribution, then adds the value to the previous one using the Autoregressive (AR) and Moving Average (MA) models (see the [ARMA](https://en.wikipedia.org/wiki/Autoregressive_moving-average_model) for more mathematical detail).
 
