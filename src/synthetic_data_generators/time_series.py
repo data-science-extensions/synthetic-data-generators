@@ -965,7 +965,9 @@ class TimeSeriesGenerator:
                 True if the value is between the minimum and maximum values, False otherwise.
         """
         if min_value > max_value:
-            raise ValueError(f"Invalid range: `min_value` ({min_value}) must be less than or equal to `max_value` ({max_value}).")
+            raise ValueError(
+                f"Invalid range: `min_value` ({min_value}) must be less than or equal to `max_value` ({max_value})."
+            )
         return min_value <= value <= max_value
 
     def _assert_value_is_between(
