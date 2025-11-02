@@ -699,7 +699,11 @@ class TimeSeriesGenerator:
         else:
             return np.zeros(len(dates)).astype(np.float64)
 
-    def generate_polynom_trend(self, interpol_nodes, n_periods: int) -> NDArray[np.float64]:
+    def generate_polynom_trend(
+        self,
+        interpolation_nodes: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list],
+        n_periods: int,
+    ) -> NDArray[np.float64]:
         """
         !!! note "Summary"
             Generate a polynomial trend based on the provided interpolation nodes.
@@ -736,20 +740,20 @@ class TimeSeriesGenerator:
                 An array of the same length as `n_periods`, where each element represents the value of the polynomial trend at that period.
         """
 
-        if len(interpol_nodes) == 0:
+        if len(interpolation_nodes) == 0:
             # No trend component:
             trend: NDArray[np.float64] = np.zeros(n_periods)
             return trend
 
-        elif len(interpol_nodes) == 1:
+        elif len(interpolation_nodes) == 1:
             # No trend component:
-            trend: NDArray[np.float64] = np.zeros(n_periods) + interpol_nodes[0][1]
+            trend: NDArray[np.float64] = np.zeros(n_periods) + interpolation_nodes[0][1]
             return trend
 
-        elif len(interpol_nodes) == 2:
+        elif len(interpolation_nodes) == 2:
             # Linear trend component:
-            x1, y1 = interpol_nodes[0]
-            x2, y2 = interpol_nodes[1]
+            x1, y1 = interpolation_nodes[0]
+            x2, y2 = interpolation_nodes[1]
             M = np.column_stack((np.array([x1, x2]), np.ones(2)))
             b = np.array([y1, y2])
             pvec = np.linalg.solve(M, b)
@@ -757,11 +761,11 @@ class TimeSeriesGenerator:
             trend = pvec[0] * trend + pvec[1]
             return trend
 
-        elif len(interpol_nodes) == 3:
+        elif len(interpolation_nodes) == 3:
             # Quadratic trend component:
-            x1, y1 = interpol_nodes[0]
-            x2, y2 = interpol_nodes[1]
-            x3, y3 = interpol_nodes[2]
+            x1, y1 = interpolation_nodes[0]
+            x2, y2 = interpolation_nodes[1]
+            x3, y3 = interpolation_nodes[2]
             M = np.column_stack(
                 (
                     np.array([x1, x2, x3]) * np.array([x1, x2, x3]),
@@ -775,12 +779,12 @@ class TimeSeriesGenerator:
             trend = pvec[0] * trend * trend + pvec[1] * trend + pvec[2]
             return trend
 
-        elif len(interpol_nodes) == 4:
+        elif len(interpolation_nodes) == 4:
             # Cubic trend component:
-            x1, y1 = interpol_nodes[0]
-            x2, y2 = interpol_nodes[1]
-            x3, y3 = interpol_nodes[2]
-            x4, y4 = interpol_nodes[3]
+            x1, y1 = interpolation_nodes[0]
+            x2, y2 = interpolation_nodes[1]
+            x3, y3 = interpolation_nodes[2]
+            x4, y4 = interpolation_nodes[3]
             M = np.column_stack(
                 (
                     np.array([x1, x2, x3, x4]) * np.array([x1, x2, x3, x4]) * np.array([x1, x2, x3, x4]),

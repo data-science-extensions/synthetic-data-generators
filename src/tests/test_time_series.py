@@ -805,20 +805,20 @@ class TestTimeSeriesGenerator_PolynomialTrends(TestCase, Default_Mixin):
 
     def test_polynomial_trend_zero_nodes(self) -> None:
         """Test generate_polynom_trend with 0 interpolation nodes (no trend)"""
-        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpol_nodes=[])
+        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpolation_nodes=[])
         _expected: NDArray = np.zeros(10)
         assert np.array_equal(_input, _expected)
 
     def test_polynomial_trend_one_node(self) -> None:
         """Test generate_polynom_trend with 1 interpolation node (constant value)"""
-        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpol_nodes=[(0, 100)])
+        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpolation_nodes=[(0, 100)])
         _expected: NDArray = np.zeros(10) + 100
         assert np.array_equal(_input, _expected)
 
     def test_polynomial_trend_two_nodes(self) -> None:
         """Test generate_polynom_trend with 2 interpolation nodes (linear)"""
         # Test a simple linear trend from (0, 0) to (9, 90) - slope of 10
-        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpol_nodes=[(0, 0), (9, 90)])
+        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpolation_nodes=[(0, 0), (9, 90)])
         # Verify length
         assert len(_input) == 10
         # Verify it passes through the interpolation nodes
@@ -833,7 +833,7 @@ class TestTimeSeriesGenerator_PolynomialTrends(TestCase, Default_Mixin):
 
     def test_polynomial_trend_three_nodes(self) -> None:
         """Test generate_polynom_trend with 3 interpolation nodes (quadratic)"""
-        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpol_nodes=[(0, 0), (5, 100), (9, 50)])
+        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=10, interpolation_nodes=[(0, 0), (5, 100), (9, 50)])
         # Verify it returns the correct length
         assert len(_input) == 10
         # Verify it contains expected values at the interpolation nodes
@@ -851,7 +851,7 @@ class TestTimeSeriesGenerator_PolynomialTrends(TestCase, Default_Mixin):
     def test_polynomial_trend_three_nodes_simple(self) -> None:
         """Test generate_polynom_trend with 3 nodes using simple parabola y=x^2"""
         # Test with simple values that form a parabola: (0,0), (1,1), (2,4)
-        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=5, interpol_nodes=[(0, 0), (1, 1), (2, 4)])
+        _input: NDArray = self.tsg.generate_polynom_trend(n_periods=5, interpolation_nodes=[(0, 0), (1, 1), (2, 4)])
         # Verify length
         assert len(_input) == 5
         # Verify the interpolation nodes match
@@ -868,7 +868,7 @@ class TestTimeSeriesGenerator_PolynomialTrends(TestCase, Default_Mixin):
     def test_polynomial_trend_four_nodes(self) -> None:
         """Test generate_polynom_trend with 4 interpolation nodes (cubic)"""
         _input: NDArray = self.tsg.generate_polynom_trend(
-            n_periods=15, interpol_nodes=[(0, 0), (5, 100), (10, 50), (14, 150)]
+            n_periods=15, interpolation_nodes=[(0, 0), (5, 100), (10, 50), (14, 150)]
         )
         # Just verify it returns the correct length and contains expected values at nodes
         assert len(_input) == 15
@@ -880,7 +880,7 @@ class TestTimeSeriesGenerator_PolynomialTrends(TestCase, Default_Mixin):
     def test_polynomial_trend_more_than_four_nodes(self) -> None:
         """Test generate_polynom_trend with >4 interpolation nodes (defaults to no trend)"""
         _input: NDArray = self.tsg.generate_polynom_trend(
-            n_periods=10, interpol_nodes=[(0, 0), (2, 50), (4, 100), (6, 150), (8, 200)]
+            n_periods=10, interpolation_nodes=[(0, 0), (2, 50), (4, 100), (6, 150), (8, 200)]
         )
         _expected: NDArray = np.zeros(10)
         assert np.array_equal(_input, _expected)
