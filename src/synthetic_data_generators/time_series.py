@@ -114,7 +114,7 @@ class TimeSeriesGenerator:
         - The generated time series data can be customized with different parameters, such as start date, number of periods, and noise scale.
     """
 
-    def __init__(self) -> None:
+    def __init__(self, seed: int | None = None) -> None:
         """
         !!! note "Summary"
             Initialize the TimeSeriesGenerator class.
@@ -130,55 +130,8 @@ class TimeSeriesGenerator:
             - It is built using Python's type hinting and type checking features to ensure that the inputs and outputs are of the expected types.
             - This helps to catch potential errors early in the development process and improve code readability.
         """
-        pass
-
-    def _random_generator(self, seed: int | None = None) -> RandomGenerator:
-        """
-        !!! note "Summary"
-            Get the random number generator.
-
-        Returns:
-            (RandomGenerator):
-                The random number generator instance.
-        """
-        return np.random.default_rng(seed=seed)
-
-    @staticmethod
-    @lru_cache
-    def _generate_dates(start_date: datetime, end_date: datetime) -> datetime_list:
-        """
-        !!! note "Summary"
-            Generate a list of dates between a start and end date.
-
-        Params:
-            start_date (datetime):
-                The starting date for generating dates.
-            end_date (datetime):
-                The ending date for generating dates.
-
-        Returns:
-            (datetime_list):
-                A list of datetime objects representing the generated dates.
-        """
-        return pd.date_range(start_date, end_date).to_pydatetime().tolist()
-
-    @staticmethod
-    def _generate_holiday_period(start_date: datetime, periods: int) -> datetime_list:
-        """
-        !!! note "Summary"
-            Generate a list of holiday dates starting from a given date.
-
-        Params:
-            start_date (datetime):
-                The starting date for generating holiday dates.
-            periods (int):
-                The number of holiday dates to generate.
-
-        Returns:
-            (datetime_list):
-                A list of datetime objects representing the generated holiday dates.
-        """
-        return pd.date_range(start_date, periods=periods).to_pydatetime().tolist()
+        self._set_seed(seed=seed)
+        self._random_generator: RandomGenerator | None = None
 
     def create_time_series(
         self,
@@ -285,6 +238,10 @@ class TimeSeriesGenerator:
         assert MA is not None
         assert manual_outliers is not None
 
+        # Set seed
+        if seed:
+            self._set_seed(seed=seed)
+
         # Date index:
         dates: datetime_list = pd.date_range(start_date, periods=n_periods).to_pydatetime().tolist()
 
@@ -315,7 +272,7 @@ class TimeSeriesGenerator:
             season = np.ones(n_periods)
 
         # Noise component on top:
-        noise: NDArray[np.float64] = self._random_generator(seed=seed).normal(
+        noise: NDArray[np.float64] = self.random_generator.normal(
             loc=0.0,
             scale=noise_scale,
             size=n_periods,
@@ -455,15 +412,11 @@ class TimeSeriesGenerator:
         n_periods: int = len(dates)
         events: NDArray[np.int_] = np.zeros(n_periods).astype(np.int_)
         event_inds: NDArray[Any] = np.arange(n_periods // period_length + 1) * period_length + start_index
-        disturbance: NDArray[np.float64] = (
-            self._random_generator(seed=seed)
-            .normal(
-                loc=0.0,
-                scale=period_sd,
-                size=len(event_inds),
-            )
-            .astype(int)
-        )
+        disturbance: NDArray[np.float64] = self.random_generator.normal(
+            loc=0.0,
+            scale=period_sd,
+            size=len(event_inds),
+        ).astype(int)
         event_inds = event_inds + disturbance
 
         # Delete indices that are out of bounds
@@ -520,15 +473,11 @@ class TimeSeriesGenerator:
         new = np.random.normal(loc=period_length, scale=period_sd, size=1).round()[0]
         while new + event_inds[-1] < n_periods:
             event_inds.append(new + event_inds[-1])
-            new = (
-                self._random_generator(seed=seed)
-                .normal(
-                    loc=period_length,
-                    scale=period_sd,
-                    size=1,
-                )
-                .round()[0]
-            )
+            new = self.random_generator.normal(
+                loc=period_length,
+                scale=period_sd,
+                size=1,
+            ).round()[0]
         event_indexes: NDArray[np.int_] = np.array(event_inds).astype(np.int_)
 
         # For any indices defined above, assign `1` to the events array
@@ -926,8 +875,12 @@ class TimeSeriesGenerator:
         self._assert_all_values_are_between(AR, min_value=0, max_value=1)
         self._assert_all_values_are_between(MA, min_value=0, max_value=1)
 
+        # Set seed
+        if seed:
+            self._set_seed(seed=seed)
+
         # Noise
-        u: NDArray[np.float64] = self._random_generator(seed=seed).normal(
+        u: NDArray[np.float64] = self.random_generator.normal(
             loc=0.0,
             scale=randomwalk_scale,
             size=n_periods,
@@ -944,6 +897,61 @@ class TimeSeriesGenerator:
                     ts[i] = ts[i] + exvar["coeff"][i_ar] * exvar["ts"][i - i_ar]
         return ts
 
+    ## --------------------------------------------------------------------------- #
+    ##  Properties                                                              ####
+    ## --------------------------------------------------------------------------- #
+
+    @property
+    def seed(self) -> int | None:
+        """
+        !!! note "Summary"
+            Get the seed value used for random number generation.
+
+        Returns:
+            (int | None):
+                The seed value used for random number generation.
+        """
+        return self._seed
+
+    @property
+    def random_generator(self) -> Generator:
+        """
+        !!! note "Summary"
+            Get the random number generator instance.
+
+        Returns:
+            (Generator):
+                The random number generator instance.
+        """
+        return self._random_generator or self._get_random_generator(seed=self._seed)
+
+    ## --------------------------------------------------------------------------- #
+    ##  Getters & Setters                                                       ####
+    ## --------------------------------------------------------------------------- #
+
+    def _set_seed(self, seed: int | None = None) -> None:
+        """
+        !!! note "Summary"
+            Set the seed value for random number generation.
+
+        Params:
+            seed (int | None):
+                The seed value to set for random number generation.
+        """
+        self._seed: int | None = seed
+        self._random_generator = None
+
+    @lru_cache
+    def _get_random_generator(self, seed: int | None = None) -> Generator:
+        """
+        !!! note "Summary"
+            Get the random number generator.
+
+        Returns:
+            (Generator):
+                The random number generator instance.
+        """
+        return np.random.default_rng(seed=seed)
     ## --------------------------------------------------------------------------- #
     ##  Validators                                                              ####
     ## --------------------------------------------------------------------------- #
