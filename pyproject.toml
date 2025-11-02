@@ -25,7 +25,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Intended Audience :: Developers",
 ]
-requires-python = ">=3.9,<4.0"
+requires-python = ">=3.10,<4.0"
 dependencies = [
     "typeguard==4.*",
     "more-itertools==10.*",
@@ -46,11 +46,11 @@ dev = [
     "black==25.*",
     "blacken-docs==1.*",
     "codespell==2.*",
-    "ipykernel==6.*",
-    "isort==6.*",
+    "ipykernel==7.*",
+    "isort==7.*",
     "pre-commit==4.*",
     "pycln==2.*",
-    "pylint==3.*",
+    "pylint==4.*",
     "pyupgrade==3.*",
     "plotly==6.*",
     "nbformat==5.*",
@@ -62,14 +62,16 @@ docs = [
     "mike==2.*",
     "mkdocs==1.*",
     "mkdocs-autorefs==1.*",
-    "mkdocs-coverage==1.*",
+    "mkdocs-coverage==2.*",
     "mkdocs-material==9.*",
     "mkdocs-jupyter==0.*",
     "mkdocstrings==0.*",
     "mkdocstrings-python==1.*",
+    "pygithub==2.*",
+    "docstring-format-checker==1.*",
 ]
 test = [
-    "mypy==1.*",
+    "mypy==1.*,!=1.17.*",
     "parameterized==0.*",
     "pytest==8.*",
     "pytest-clarity==1.*",
@@ -78,6 +80,7 @@ test = [
     "pytest-sugar==1.*",
     "pytest-xdist==3.*",
     "requests==2.*",
+    "complexipy==4.*",
 ]
 
 [tool.black]
@@ -173,6 +176,25 @@ disable = [
     "E0606", # possibly-used-before-assignment
     "E1136", # unsubscriptable-object
     "E1137", # unsupported-assignment-operation
+]
+
+[tool.dfc]
+allow_undefined_sections = false
+require_docstrings = true
+check_private = true
+validate_param_types = true
+sections = [
+    { order=1,  name="summary",    type="free_text",          required=true,  admonition="note",     prefix="!!!" },
+    { order=2,  name="details",    type="free_text",          required=false, admonition="abstract", prefix="!!!" },
+    { order=3,  name="important",  type="free_text",          required=false, admonition="warning",  prefix="???+" },
+    { order=4,  name="params",     type="list_name_and_type", required=false, admonition=false },
+    { order=5,  name="methods",    type="list_name",          required=false, admonition=false },
+    { order=6,  name="attributes", type="list_name_and_type", required=false, admonition=false },
+    { order=7,  name="raises",     type="list_type",          required=false, admonition=false },
+    { order=8,  name="returns",    type="list_name_and_type", required=false, admonition=false },
+    { order=9,  name="yields",     type="list_type",          required=false, admonition=false },
+    { order=10, name="examples",   type="free_text",          required=false, admonition="example",  prefix="???+" },
+    { order=11, name="notes",      type="free_text",          required=false, admonition="note",     prefix="???" },
 ]
 
 [tool.bump_version.replacements]
