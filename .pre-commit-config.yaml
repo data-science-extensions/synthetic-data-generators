@@ -103,6 +103,17 @@ repos:
         args:
           - "--all-groups"
 
+  # Check docstrings
+  - repo: https://github.com/data-science-extensions/docstring-format-checker
+    rev: "v1.5.1"
+    hooks:
+      - id: docstring-format-checker
+        args:
+          - "--config=pyproject.toml"
+          - "--check"
+          - "--exclude=src/tests/*"
+          - "--exclude=src/utils/*"
+
   # Run Pylint
   - repo: local
     hooks:
