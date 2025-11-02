@@ -57,9 +57,8 @@ import numpy as np
 import pandas as pd
 from numpy.random import Generator as RandomGenerator
 from numpy.typing import NDArray
-from toolbox_python.checkers import assert_all_values_of_type
+from toolbox_python.checkers import assert_all_values_of_type, is_valid
 from toolbox_python.collection_types import (
-    datetime_list,
     datetime_list_tuple,
     dict_str_any,
     int_list_tuple,
@@ -258,7 +257,7 @@ class TimeSeriesGenerator:
             self._set_seed(seed=seed)
 
         # Date index:
-        dates: datetime_list = pd.date_range(start_date, periods=n_periods).to_pydatetime().tolist()
+        dates: list[datetime] = self._get_dates(start_date, n_periods=n_periods)
 
         # Cubic trend component:
         trend: NDArray[np.float64] = self.generate_polynom_trend(interpolation_nodes, n_periods)
@@ -365,7 +364,7 @@ class TimeSeriesGenerator:
         season_dates_list: list[datetime] = []
         for _dates in season_dates:
             season_dates_list.extend(
-                self._generate_holiday_period(
+                self._get_holiday_period(
                     start_date=_dates[0],  # type: ignore
                     periods=_dates[1],  # type: ignore
                 )
@@ -929,13 +928,13 @@ class TimeSeriesGenerator:
         return self._seed
 
     @property
-    def random_generator(self) -> Generator:
+    def random_generator(self) -> RandomGenerator:
         """
         !!! note "Summary"
             Get the random number generator instance.
 
         Returns:
-            (Generator):
+            (RandomGenerator):
                 The random number generator instance.
         """
         return self._random_generator or self._get_random_generator(seed=self._seed)
@@ -957,21 +956,69 @@ class TimeSeriesGenerator:
         self._random_generator = None
 
     @lru_cache
-    def _get_random_generator(self, seed: int | None = None) -> Generator:
+    def _get_random_generator(self, seed: int | None = None) -> RandomGenerator:
         """
         !!! note "Summary"
             Get the random number generator.
 
         Returns:
-            (Generator):
+            (RandomGenerator):
                 The random number generator instance.
         """
         return np.random.default_rng(seed=seed)
+
+    @staticmethod
+    @overload
+    def _get_dates(start_date: datetime, *, end_date: datetime) -> list[datetime]: ...
+    @staticmethod
+    @overload
+    def _get_dates(start_date: datetime, *, n_periods: int) -> list[datetime]: ...
+    @staticmethod
+    @lru_cache
+    def _get_dates(
+        start_date: datetime, *, end_date: datetime | None = None, n_periods: int | None = None
+    ) -> list[datetime]:
+        """
+        !!! note "Summary"
+            Generate a list of dates between a start and end date.
+
+        Params:
+            start_date (datetime):
+                The starting date for generating dates.
+            end_date (datetime):
+                The ending date for generating dates.
+
+        Returns:
+            (list[datetime]):
+                A list of datetime objects representing the generated dates.
+        """
+        return pd.date_range(start=start_date, end=end_date, periods=n_periods).to_pydatetime().tolist()  # type:ignore
+
+    @staticmethod
+    @lru_cache
+    def _get_holiday_period(start_date: datetime, periods: int) -> list[datetime]:
+        """
+        !!! note "Summary"
+            Generate a list of holiday dates starting from a given date.
+
+        Params:
+            start_date (datetime):
+                The starting date for generating holiday dates.
+            periods (int):
+                The number of holiday dates to generate.
+
+        Returns:
+            (list[datetime]):
+                A list of datetime objects representing the generated holiday dates.
+        """
+        return TimeSeriesGenerator._get_dates(start_date, n_periods=periods)
+
     ## --------------------------------------------------------------------------- #
     ##  Validators                                                              ####
     ## --------------------------------------------------------------------------- #
 
-    def _value_is_between(self, value: float, min_value: float, max_value: float) -> bool:
+    @staticmethod
+    def _value_is_between(value: float, min_value: float, max_value: float) -> bool:
         """
         !!! note "Summary"
             Check if a value is between two other values.
@@ -988,14 +1035,13 @@ class TimeSeriesGenerator:
             (bool):
                 True if the value is between the minimum and maximum values, False otherwise.
         """
-        if min_value > max_value:
-            raise ValueError(
-                f"Invalid range: `min_value` ({min_value}) must be less than or equal to `max_value` ({max_value})."
-            )
-        return min_value <= value <= max_value
+        result: bool = is_valid(value, ">=", min_value) and is_valid(value, "<=", max_value)
+        if not result:
+            raise ValueError(f"Invalid Value: `{value}`. Must be between `{min_value}` and `{max_value}`")
+        return result
 
+    @staticmethod
     def _assert_value_is_between(
-        self,
         value: float,
         min_value: float,
         max_value: float,
@@ -1016,11 +1062,11 @@ class TimeSeriesGenerator:
             (AssertionError):
                 If the value is not between the minimum and maximum values.
         """
-        if not self._value_is_between(value, min_value, max_value):
+        if not TimeSeriesGenerator._value_is_between(value, min_value, max_value):
             raise AssertionError(f"Value must be between `{min_value}` and `{max_value}`: `{value}`")
 
+    @staticmethod
     def _all_values_are_between(
-        self,
         values: list[float] | tuple[float, ...],
         min_value: float,
         max_value: float,
@@ -1041,10 +1087,10 @@ class TimeSeriesGenerator:
             (bool):
                 True if all values are between the minimum and maximum values, False otherwise.
         """
-        return all(self._value_is_between(value, min_value, max_value) for value in values)
+        return all(TimeSeriesGenerator._value_is_between(value, min_value, max_value) for value in values)
 
+    @staticmethod
     def _assert_all_values_are_between(
-        self,
         values: list[float] | tuple[float, ...],
         min_value: float,
         max_value: float,
@@ -1066,7 +1112,7 @@ class TimeSeriesGenerator:
                 If any value is not between the minimum and maximum values.
         """
         values_not_between: list[float] = [
-            value for value in values if not self._value_is_between(value, min_value, max_value)
+            value for value in values if not TimeSeriesGenerator._value_is_between(value, min_value, max_value)
         ]
         if not len(values_not_between) == 0:
             raise AssertionError(f"Values not between `{min_value}` and `{max_value}`: {values_not_between}")
