@@ -86,6 +86,7 @@ Collection_of_datetime_or_int = Union[Tuple_of_datetime_or_int, List_of_datetime
 Collection_of_Collection_of_datetime_or_int = Union[
     list[Collection_of_datetime_or_int], tuple[Collection_of_datetime_or_int, ...]
 ]
+number = Union[float, int]
 
 
 # ---------------------------------------------------------------------------- #
@@ -151,24 +152,24 @@ class TimeSeriesGenerator:
         self,
         start_date: datetime = datetime(2019, 1, 1),
         n_periods: int = 1096,
-        interpolation_nodes: tuple[int_list_tuple, ...] | list[int_list_tuple] = (
+        interpolation_nodes: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list] = (
             [0, 98],
             [300, 92],
             [700, 190],
             [1096, 213],
         ),
-        level_breaks: tuple[int_list_tuple, ...] | list[int_list_tuple] | None = (
+        level_breaks: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list] | None = (
             [250, 100],
             [650, -50],
         ),
-        AR: list[float] | None = None,
-        MA: list[float] | None = None,
-        randomwalk_scale: float = 2,
-        exogenous: list[dict[Literal["coeff", "ts"], list[float]]] | None = None,
+        AR: list[number] | tuple[number, ...] | None = None,
+        MA: list[number] | tuple[number, ...] | None = None,
+        randomwalk_scale: number = 2,
+        exogenous: list[dict[Literal["coeff", "ts"], list[number]]] | None = None,
         season_conf: dict_str_any | None = {"style": "holiday"},
-        season_eff: float = 0.15,
-        manual_outliers: tuple[int_list_tuple, ...] | list[int_list_tuple] | None = None,
-        noise_scale: float = 10,
+        season_eff: number = 0.15,
+        manual_outliers: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list] | None = None,
+        noise_scale: number = 10,
         seed: int | None = None,
     ) -> pd.DataFrame:
         """
@@ -381,7 +382,7 @@ class TimeSeriesGenerator:
         self,
         dates: datetime_list_tuple,
         period_length: int = 7,
-        period_sd: float = 0.5,
+        period_sd: number = 0.5,
         start_index: int = 4,
         seed: int | None = None,
     ) -> NDArray[np.float64]:
@@ -592,7 +593,7 @@ class TimeSeriesGenerator:
         ],
         season_dates: Collection_of_Collection_of_datetime_or_int | None = None,
         period_length: int | None = None,
-        period_sd: float | None = None,
+        period_sd: number | None = None,
         start_index: int | None = None,
         seed: int | None = None,
     ) -> NDArray[np.float64]:
@@ -629,7 +630,7 @@ class TimeSeriesGenerator:
                 The length of the period for seasonality.<br>
                 For example, if the frequency is weekly, this would be `7`.<br>
                 Default is `7`.
-            period_sd (float | None):
+            period_sd (number | None):
                 The standard deviation of the disturbance.<br>
                 Default is `0.5`.
             start_index (int | None):
@@ -793,11 +794,11 @@ class TimeSeriesGenerator:
 
     def generate_ARMA(
         self,
-        AR: list[float],
-        MA: list[float],
-        randomwalk_scale: float,
+        AR: list[number] | tuple[number, ...],
+        MA: list[number] | tuple[number, ...],
+        randomwalk_scale: number,
         n_periods: int,
-        exogenous: list[dict[Literal["coeff", "ts"], list[float]]] | None = None,
+        exogenous: list[dict[Literal["coeff", "ts"], list[number]]] | None = None,
         seed: int | None = None,
     ) -> NDArray[np.float64]:
         """
@@ -1018,17 +1019,17 @@ class TimeSeriesGenerator:
     ## --------------------------------------------------------------------------- #
 
     @staticmethod
-    def _value_is_between(value: float, min_value: float, max_value: float) -> bool:
+    def _value_is_between(value: number, min_value: number, max_value: number) -> bool:
         """
         !!! note "Summary"
             Check if a value is between two other values.
 
         Params:
-            value (float):
+            value (number):
                 The value to check.
-            min_value (float):
+            min_value (number):
                 The minimum value.
-            max_value (float):
+            max_value (number):
                 The maximum value.
 
         Returns:
@@ -1042,20 +1043,20 @@ class TimeSeriesGenerator:
 
     @staticmethod
     def _assert_value_is_between(
-        value: float,
-        min_value: float,
-        max_value: float,
+        value: number,
+        min_value: number,
+        max_value: number,
     ) -> None:
         """
         !!! note "Summary"
             Assert that a value is between two other values.
 
         Params:
-            value (float):
+            value (number):
                 The value to check.
-            min_value (float):
+            min_value (number):
                 The minimum value.
-            max_value (float):
+            max_value (number):
                 The maximum value.
 
         Raises:
@@ -1067,20 +1068,20 @@ class TimeSeriesGenerator:
 
     @staticmethod
     def _all_values_are_between(
-        values: list[float] | tuple[float, ...],
-        min_value: float,
-        max_value: float,
+        values: list[number] | tuple[number, ...],
+        min_value: number,
+        max_value: number,
     ) -> bool:
         """
         !!! note "Summary"
             Check if all values in an array are between two other values.
 
         Params:
-            values (Union[list[float], tuple[float, ...]]):
+            values (Union[list[number], tuple[number, ...]]):
                 The array of values to check.
-            min_value (float):
+            min_value (number):
                 The minimum value.
-            max_value (float):
+            max_value (number):
                 The maximum value.
 
         Returns:
@@ -1091,27 +1092,27 @@ class TimeSeriesGenerator:
 
     @staticmethod
     def _assert_all_values_are_between(
-        values: list[float] | tuple[float, ...],
-        min_value: float,
-        max_value: float,
+        values: list[number] | tuple[number, ...],
+        min_value: number,
+        max_value: number,
     ) -> None:
         """
         !!! note "Summary"
             Assert that all values in an array are between two other values.
 
         Params:
-            values (Union[list[float], tuple[float, ...]]):
+            values (Union[list[number], tuple[number, ...]]):
                 The array of values to check.
-            min_value (float):
+            min_value (number):
                 The minimum value.
-            max_value (float):
+            max_value (number):
                 The maximum value.
 
         Raises:
             (AssertionError):
                 If any value is not between the minimum and maximum values.
         """
-        values_not_between: list[float] = [
+        values_not_between: list[number] = [
             value for value in values if not TimeSeriesGenerator._value_is_between(value, min_value, max_value)
         ]
         if not len(values_not_between) == 0:
