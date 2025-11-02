@@ -718,39 +718,30 @@ class TimeSeriesGenerator:
             (NDArray[np.float64]):
                 An array of the same length as `dates`, where each element is a sine value representing the seasonal pattern.
         """
-        if "fixed" in style and "error" in style:
-            assert period_length is not None
-            assert period_sd is not None
-            assert start_index is not None
-            return self.generate_fixed_error_index(
-                dates=dates,
-                period_length=period_length,
-                period_sd=period_sd,
-                start_index=start_index,
-                seed=seed,
-            ).astype(np.float64)
-        elif "semi" in style and "markov" in style:
-            assert period_length is not None
-            assert period_sd is not None
-            assert start_index is not None
-            return self.generate_semi_markov_index(
-                dates=dates,
-                period_length=period_length,
-                period_sd=period_sd,
-                start_index=start_index,
-                seed=seed,
-            ).astype(np.float64)
-        elif style == "holiday":
-            assert season_dates is not None
-            return self.generate_holiday_index(dates=dates, season_dates=season_dates).astype(np.float64)
-        elif "sin" in style and "covar" in style:
-            assert period_length is not None
-            assert start_index is not None
-            return self.generate_sin_covar_index(dates=dates, period_length=period_length).astype(np.float64)
-        elif style == "sin":
-            assert period_length is not None
-            assert start_index is not None
-            return self.generate_sin_index(dates=dates, period_length=period_length).astype(np.float64)
+
+        funcs = {
+            "fixed+error": self.generate_fixed_error_index,
+            "semi-markov": self.generate_semi_markov_index,
+            "holiday": self.generate_holiday_index,
+            "sin": self.generate_sin_index,
+            "sin_covar": self.generate_sin_covar_index,
+        }
+
+        func = funcs.get(style)
+
+        _params = {
+            "dates": dates,
+            "season_dates": season_dates,
+            "period_length": period_length,
+            "period_sd": period_sd,
+            "start_index": start_index,
+            "seed": seed,
+        }
+
+        params = {key: value for key, value in _params.items() if value is not None}
+
+        if func:
+            return func(**params).astype(np.float64)  # type:ignore
         else:
             return np.zeros(len(dates)).astype(np.float64)
 
