@@ -50,6 +50,7 @@ from typing import (
     Any,
     Literal,
     Union,
+    overload,
 )
 
 # ## Python Third Party Imports ----
@@ -61,7 +62,9 @@ from toolbox_python.checkers import assert_all_values_of_type, is_valid
 from toolbox_python.collection_types import (
     datetime_list_tuple,
     dict_str_any,
+    int_list,
     int_list_tuple,
+    int_tuple,
 )
 from typeguard import typechecked
 
@@ -589,6 +592,57 @@ class TimeSeriesGenerator:
         sin_wave: NDArray[np.float64] = np.sin((covar_wave * dx).cumsum())
         return sin_wave
 
+    @overload
+    def generate_season_index(
+        self,
+        dates: datetime_list_tuple,
+        style: Literal["fixed+error"],
+        *,
+        period_length: int,
+        period_sd: number,
+        start_index: int,
+        seed: int | None = None,
+    ) -> NDArray[np.float64]: ...
+    @overload
+    def generate_season_index(
+        self,
+        dates: datetime_list_tuple,
+        style: Literal["semi-markov"],
+        *,
+        period_length: int,
+        period_sd: number,
+        start_index: int,
+        seed: int,
+    ) -> NDArray[np.float64]: ...
+    @overload
+    def generate_season_index(
+        self,
+        dates: datetime_list_tuple,
+        style: Literal["holiday"],
+        *,
+        season_dates: Collection_of_Collection_of_datetime_or_int,
+        seed: int | None = None,
+    ) -> NDArray[np.float64]: ...
+    @overload
+    def generate_season_index(
+        self,
+        dates: datetime_list_tuple,
+        style: Literal["sin"],
+        *,
+        period_length: int | None = None,
+        start_index: int | None = None,
+        seed: int | None = None,
+    ) -> NDArray[np.float64]: ...
+    @overload
+    def generate_season_index(
+        self,
+        dates: datetime_list_tuple,
+        style: Literal["sin_covar"],
+        *,
+        period_length: int,
+        start_index: int,
+        seed: int | None = None,
+    ) -> NDArray[np.float64]: ...
     def generate_season_index(
         self,
         dates: datetime_list_tuple,
@@ -599,6 +653,7 @@ class TimeSeriesGenerator:
             "sin",
             "sin_covar",
         ],
+        *,
         season_dates: Collection_of_Collection_of_datetime_or_int | None = None,
         period_length: int | None = None,
         period_sd: number | None = None,
