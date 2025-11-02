@@ -63,7 +63,6 @@ from toolbox_python.collection_types import (
     datetime_list_tuple,
     dict_str_any,
     int_list,
-    int_list_tuple,
     int_tuple,
 )
 from typeguard import typechecked
@@ -744,6 +743,44 @@ class TimeSeriesGenerator:
             return func(**params).astype(np.float64)  # type:ignore
         else:
             return np.zeros(len(dates)).astype(np.float64)
+
+        # if "fixed" in style and "error" in style:
+        #     assert period_length is not None
+        #     assert period_sd is not None
+        #     assert start_index is not None
+        #     return self.generate_fixed_error_index(
+        #         dates=dates,
+        #         period_length=period_length,
+        #         period_sd=period_sd,
+        #         start_index=start_index,
+        #         seed=seed,
+        #     ).astype(np.float64)
+        # elif "semi" in style and "markov" in style:
+        #     assert period_length is not None
+        #     assert period_sd is not None
+        #     assert start_index is not None
+        #     return self.generate_semi_markov_index(
+        #         dates=dates,
+        #         period_length=period_length,
+        #         period_sd=period_sd,
+        #         start_index=start_index,
+        #         seed=seed,
+        #     ).astype(np.float64)
+        # elif style == "holiday":
+        #     assert season_dates is not None
+        #     return self.generate_holiday_index(dates=dates, season_dates=season_dates).astype(np.float64)
+        # elif "sin" in style and "covar" in style:
+        #     assert period_length is not None
+        #     assert start_index is not None
+        #     return self.generate_sin_covar_index(
+        #         dates=dates, period_length=period_length, start_index=start_index
+        #     ).astype(np.float64)
+        # elif style == "sin":
+        #     assert period_length is not None
+        #     assert start_index is not None
+        #     return self.generate_sin_index(dates=dates, period_length=period_length).astype(np.float64)
+        # else:
+        #     return np.zeros(len(dates)).astype(np.float64)
 
     def generate_polynom_trend(
         self,
