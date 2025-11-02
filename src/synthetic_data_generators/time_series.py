@@ -423,6 +423,10 @@ class TimeSeriesGenerator:
                 An array of the same length as `dates`, where each element is `1` if the corresponding date is a holiday, and `0` otherwise.
         """
 
+        # Set seed
+        if seed:
+            self._set_seed(seed=seed)
+
         # Process
         n_periods: int = len(dates)
         events: NDArray[np.int_] = np.zeros(n_periods).astype(np.int_)
@@ -481,11 +485,15 @@ class TimeSeriesGenerator:
                 An array of the same length as `dates`, where each element is `1` if the corresponding date is a holiday, and `0` otherwise.
         """
 
+        # Set seed
+        if seed:
+            self._set_seed(seed=seed)
+
         # Process
         n_periods: int = len(dates)
         events: NDArray[np.int_] = np.zeros(n_periods).astype(np.int_)
         event_inds: list[int] = [start_index]
-        new = np.random.normal(loc=period_length, scale=period_sd, size=1).round()[0]
+        new = self.random_generator.normal(loc=period_length, scale=period_sd, size=1).round()[0]
         while new + event_inds[-1] < n_periods:
             event_inds.append(new + event_inds[-1])
             new = self.random_generator.normal(
