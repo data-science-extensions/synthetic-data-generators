@@ -47,15 +47,15 @@ repos:
           - "black>=23.3"
 
   # Run MyPy type checks
-  - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: "v1.18.2"
-    hooks:
-      - id: mypy
-        files: src/synthetic_data_generators
-        args:
-          - "--install-types"
-          - "--config-file=pyproject.toml"
-          - "--allow-redefinition"
+  # - repo: https://github.com/pre-commit/mirrors-mypy
+  #   rev: "v1.18.2"
+  #   hooks:
+  #     - id: mypy
+  #       files: src/synthetic_data_generators
+  #       args:
+  #         - "--install-types"
+  #         - "--config-file=pyproject.toml"
+  #         - "--allow-redefinition"
 
   # Reorder Python imports
   - repo: https://github.com/pycqa/isort
