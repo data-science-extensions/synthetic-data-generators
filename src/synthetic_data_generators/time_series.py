@@ -44,6 +44,7 @@
 from __future__ import annotations
 
 # ## Python StdLib Imports ----
+from collections.abc import Sequence
 from datetime import datetime
 from functools import lru_cache
 from typing import (
@@ -58,17 +59,11 @@ import numpy as np
 import pandas as pd
 from numpy.random import Generator as RandomGenerator
 from numpy.typing import NDArray
-from toolbox_python.checkers import assert_all_values_of_type, is_valid
-from toolbox_python.collection_types import (
-    datetime_list_tuple,
-    dict_str_any,
-    int_list,
-    int_tuple,
-)
+from toolbox_python.checkers import assert_all_values_of_type
 from typeguard import typechecked
 
 # ## Local First Party Imports ----
-from synthetic_data_generators.utils.validators import Validators
+from synthetic_data_generators.utils.validators import Validators, number
 
 
 ## --------------------------------------------------------------------------- #
@@ -77,21 +72,6 @@ from synthetic_data_generators.utils.validators import Validators
 
 
 __all__: list[str] = ["TimeSeriesGenerator"]
-
-
-## --------------------------------------------------------------------------- #
-##  Types                                                                   ####
-## --------------------------------------------------------------------------- #
-
-
-datetime_or_int = Union[datetime, int]
-List_of_datetime_or_int = list[datetime_or_int]
-Tuple_of_datetime_or_int = tuple[datetime, int]
-Collection_of_datetime_or_int = Union[Tuple_of_datetime_or_int, List_of_datetime_or_int]
-Collection_of_Collection_of_datetime_or_int = Union[
-    list[Collection_of_datetime_or_int], tuple[Collection_of_datetime_or_int, ...]
-]
-number = Union[float, int]
 
 
 # ---------------------------------------------------------------------------- #
@@ -157,23 +137,15 @@ class TimeSeriesGenerator(Validators):
         self,
         start_date: datetime = datetime(2019, 1, 1),
         n_periods: int = 1096,
-        interpolation_nodes: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list] = (
-            [0, 98],
-            [300, 92],
-            [700, 190],
-            [1096, 213],
-        ),
-        level_breaks: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list] | None = (
-            [250, 100],
-            [650, -50],
-        ),
-        AR: list[number] | tuple[number, ...] | None = None,
-        MA: list[number] | tuple[number, ...] | None = None,
+        interpolation_nodes: Sequence[Sequence[int]] = ([0, 98], [300, 92], [700, 190], [1096, 213]),
+        level_breaks: Sequence[Sequence[int]] | None = ([250, 100], [650, -50]),
+        AR: Sequence[number] | None = None,
+        MA: Sequence[number] | None = None,
         randomwalk_scale: number = 2,
-        exogenous: list[dict[Literal["coeff", "ts"], list[number]]] | None = None,
+        exogenous: Sequence[dict[Literal["coeff", "ts"], Sequence[number]]] | None = None,
         season_conf: dict_str_any | None = {"style": "holiday"},
         season_eff: number = 0.15,
-        manual_outliers: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list] | None = None,
+        manual_outliers: Sequence[Sequence[int]] | None = None,
         noise_scale: number = 10,
         seed: int | None = None,
     ) -> pd.DataFrame:
@@ -199,35 +171,35 @@ class TimeSeriesGenerator(Validators):
             n_periods (int):
                 The number of periods for the time series.<br>
                 Default is `1096`.
-            interpolation_nodes (tuple[int_list_tuple, ...] | list[int_list_tuple]):
+            interpolation_nodes (Sequence[Sequence[int]]):
                 A collection of interpolation nodes, where each node is a tuple containing the x-coordinate and y-coordinate.<br>
                 The x-coordinates should be in ascending order.<br>
                 Default is `([0, 98], [300, 92], [700, 190], [1096, 213])`.
-            level_breaks (tuple[int_list_tuple, ...] | list[int_list_tuple] | None):
+            level_breaks (Sequence[Sequence[int]] | None):
                 A collection of level breaks, where each break is a tuple containing the index and the value to add.<br>
                 Default is `([250, 100], [650, -50])`.
-            AR (list[float] | None):
+            AR (Sequence[number] | None):
                 The autoregressive coefficients for the ARMA model.<br>
                 Default is `None`.
-            MA (list[float] | None):
+            MA (Sequence[number] | None):
                 The moving average coefficients for the ARMA model.<br>
                 Default is `None`.
-            randomwalk_scale (float):
+            randomwalk_scale (number):
                 The scale of the random walk component.<br>
                 Default is `2`.
-            exogenous (list[dict[Literal["coeff", "ts"], list[float]]] | None):
+            exogenous (Sequence[dict[Literal["coeff", "ts"], Sequence[number]]] | None):
                 A list of exogenous variables to include in the ARMA model.<br>
                 Default is `None`.
             season_conf (dict_str_any | None):
                 A dictionary containing the configuration for seasonality.<br>
                 Default is `{"style": "holiday"}`.
-            season_eff (float):
+            season_eff (number):
                 The effectiveness of the seasonality component.<br>
                 Default is `0.15`.
-            manual_outliers (tuple[int_list_tuple, ...] | list[int_list_tuple] | None):
+            manual_outliers (Sequence[Sequence[int]] | None):
                 A collection of manual outliers, where each outlier is a tuple containing the index and the value to set.<br>
                 Default is `None`.
-            noise_scale (float):
+            noise_scale (number):
                 The scale of the noise component.<br>
                 Default is `10`.
             seed (int | None):
@@ -320,8 +292,8 @@ class TimeSeriesGenerator(Validators):
     @typechecked
     def generate_holiday_index(
         self,
-        dates: datetime_list_tuple,
-        season_dates: Collection_of_Collection_of_datetime_or_int,
+        dates: Sequence[datetime],
+        season_dates: Sequence[Sequence[datetime | int]],
     ) -> NDArray[np.int_]:
         """
         !!! note "Summary"
@@ -337,9 +309,9 @@ class TimeSeriesGenerator(Validators):
             It is not intended to be called directly.
 
         Params:
-            dates (datetime_list_tuple):
+            dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
-            season_dates (Collection_of_Collection_of_datetime_or_int):
+            season_dates (Sequence[Sequence[datetime | int]]):
                 Collection of collections containing holiday dates and their respective periods.<br>
                 Each element in the collection should contain exactly two elements: a datetime object and an integer representing the number of periods.<br>
                 Some example inputs include:\n
@@ -385,7 +357,7 @@ class TimeSeriesGenerator(Validators):
     @typechecked
     def generate_fixed_error_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         period_length: int = 7,
         period_sd: number = 0.5,
         start_index: int = 4,
@@ -406,13 +378,13 @@ class TimeSeriesGenerator(Validators):
             It is not intended to be called directly.
 
         Params:
-            dates (datetime_list_tuple):
+            dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
             period_length (int):
                 The length of the period for seasonality.<br>
                 For example, if the frequency is weekly, this would be `7`.<br>
                 Default is `7`.
-            period_sd (float):
+            period_sd (number):
                 The standard deviation of the disturbance.<br>
                 Default is `0.5`.
             start_index (int):
@@ -452,7 +424,7 @@ class TimeSeriesGenerator(Validators):
 
     def generate_semi_markov_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         period_length: int = 7,
         period_sd: float = 0.5,
         start_index: int = 4,
@@ -468,7 +440,7 @@ class TimeSeriesGenerator(Validators):
             - The return array is a boolean `1` or `0` of length `n_periods`. It will have a seasonality of `period_length` and a disturbance standard deviation of `period_sd`. The result can be used as a uniform distribution of weekdays in a histogram (if for eg. frequency is weekly).
 
         Params:
-            dates (datetime_list_tuple):
+            dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
             period_length (int):
                 The length of the period for seasonality.<br>
@@ -516,7 +488,7 @@ class TimeSeriesGenerator(Validators):
 
     def generate_sin_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         period_length: int = 7,
         start_index: int = 4,
     ) -> NDArray[np.float64]:
@@ -531,7 +503,7 @@ class TimeSeriesGenerator(Validators):
             - The result can be used to represent seasonal patterns in time series data, such as daily or weekly cycles.
 
         Params:
-            dates (datetime_list_tuple):
+            dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
             period_length (int):
                 The length of the period for seasonality.<br>
@@ -555,7 +527,7 @@ class TimeSeriesGenerator(Validators):
 
     def generate_sin_covar_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         period_length: int = 7,
         start_index: int = 4,
     ) -> NDArray[np.float64]:
@@ -570,7 +542,7 @@ class TimeSeriesGenerator(Validators):
             - The result can be used to represent seasonal patterns in time series data, such as daily or weekly cycles.
 
         Params:
-            dates (datetime_list_tuple):
+            dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
             period_length (int):
                 The length of the period for seasonality.<br>
@@ -597,7 +569,7 @@ class TimeSeriesGenerator(Validators):
     @overload
     def generate_season_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         style: Literal["fixed+error"],
         *,
         period_length: int,
@@ -608,7 +580,7 @@ class TimeSeriesGenerator(Validators):
     @overload
     def generate_season_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         style: Literal["semi-markov"],
         *,
         period_length: int,
@@ -619,16 +591,16 @@ class TimeSeriesGenerator(Validators):
     @overload
     def generate_season_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         style: Literal["holiday"],
         *,
-        season_dates: Collection_of_Collection_of_datetime_or_int,
+        season_dates: Sequence[Sequence[datetime | int]],
         seed: int | None = None,
     ) -> NDArray[np.float64]: ...
     @overload
     def generate_season_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         style: Literal["sin"],
         *,
         period_length: int | None = None,
@@ -638,7 +610,7 @@ class TimeSeriesGenerator(Validators):
     @overload
     def generate_season_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         style: Literal["sin_covar"],
         *,
         period_length: int,
@@ -647,7 +619,7 @@ class TimeSeriesGenerator(Validators):
     ) -> NDArray[np.float64]: ...
     def generate_season_index(
         self,
-        dates: datetime_list_tuple,
+        dates: Sequence[datetime],
         style: Literal[
             "fixed+error",
             "semi-markov",
@@ -656,7 +628,7 @@ class TimeSeriesGenerator(Validators):
             "sin_covar",
         ],
         *,
-        season_dates: Collection_of_Collection_of_datetime_or_int | None = None,
+        season_dates: Sequence[Sequence[datetime | int]] | None = None,
         period_length: int | None = None,
         period_sd: number | None = None,
         start_index: int | None = None,
@@ -673,7 +645,7 @@ class TimeSeriesGenerator(Validators):
             - The return array is a boolean `1` or `0` of length `n_periods`. It will have a seasonality of `period_length` and a disturbance standard deviation of `period_sd`. The result can be used as a non-uniform distribution of weekdays in a histogram (if for eg. frequency is weekly).
 
         Params:
-            dates (datetime_list_tuple):
+            dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
             style (Literal):
                 The style of the seasonality index to generate.<br>
@@ -787,7 +759,7 @@ class TimeSeriesGenerator(Validators):
 
     def generate_polynom_trend(
         self,
-        interpolation_nodes: tuple[int_tuple, ...] | tuple[int_list, ...] | list[int_tuple] | list[int_list],
+        interpolation_nodes: Sequence[Sequence[int]],
         n_periods: int,
     ) -> NDArray[np.float64]:
         """
@@ -805,7 +777,7 @@ class TimeSeriesGenerator(Validators):
             It is not intended to be used for higher-order polynomial trends.
 
         Params:
-            interpol_nodes (tuple[int_list_tuple, ...] | list[int_list_tuple]):
+            interpolation_nodes (Sequence[Sequence[int]]):
                 A collection of interpolation nodes, where each node is a tuple containing the x-coordinate and y-coordinate.
                 The x-coordinates should be in ascending order.
             n_periods (int):
@@ -892,11 +864,11 @@ class TimeSeriesGenerator(Validators):
 
     def generate_ARMA(
         self,
-        AR: list[number] | tuple[number, ...],
-        MA: list[number] | tuple[number, ...],
+        AR: Sequence[number],
+        MA: Sequence[number],
         randomwalk_scale: number,
         n_periods: int,
-        exogenous: list[dict[Literal["coeff", "ts"], list[number]]] | None = None,
+        exogenous: Sequence[dict[Literal["coeff", "ts"], Sequence[number]]] | None = None,
         seed: int | None = None,
     ) -> NDArray[np.float64]:
         """
@@ -910,21 +882,21 @@ class TimeSeriesGenerator(Validators):
             - The function uses numpy's random number generator to generate the noise component of the ARMA model.
 
         Params:
-            AR (list[float]):
+            AR (Sequence[number]):
                 List of autoregressive coefficients.
                 The length of the list determines the order of the AR component.
                 All values must be between `0` and `1`.
-            MA (list[float]):
+            MA (Sequence[number]):
                 List of moving average coefficients.
                 The length of the list determines the order of the MA component.
                 All values must be between `0` and `1`.
-            randomwalk_scale (float):
+            randomwalk_scale (number):
                 Scale parameter for the random walk component.
                 This controls the standard deviation of the noise added to the time series.
             n_periods (int):
                 The number of periods for which to generate the ARMA time series.
                 This determines the length of the output array.
-            exogenous (list[dict[Literal["coeff", "ts"], list[float]]] | None):
+            exogenous (Sequence[dict[Literal["coeff", "ts"], Sequence[number]]] | None):
                 Optional list of exogenous variables, where each variable is represented as a dictionary with keys "coeff" and "ts".
                 "coeff" is a list of coefficients for the exogenous variable, and "ts" is a list of values for that variable.
             seed (int | None):
