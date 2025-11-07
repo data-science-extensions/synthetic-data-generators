@@ -44,7 +44,7 @@
 from __future__ import annotations
 
 # ## Python StdLib Imports ----
-from collections.abc import Sequence
+from collections.abc import Callable, Sequence
 from datetime import datetime
 from functools import lru_cache
 from typing import (
@@ -677,7 +677,8 @@ class TimeSeriesGenerator(Validators):
                 An array of the same length as `dates`, where each element is a sine value representing the seasonal pattern.
         """
 
-        funcs = {
+        # Map styles to functions
+        funcs: dict[str, Callable] = {
             "fixed+error": self.generate_fixed_error_index,
             "semi-markov": self.generate_semi_markov_index,
             "holiday": self.generate_holiday_index,
@@ -685,9 +686,15 @@ class TimeSeriesGenerator(Validators):
             "sin_covar": self.generate_sin_covar_index,
         }
 
-        func = funcs.get(style)
+        # Get function based on style
+        func: Callable | None = funcs.get(style)
 
-        _params = {
+        # Guard clause for unsupported style
+        if not func:
+            return np.zeros(len(dates)).astype(np.float64)
+
+        # Prepare parameters
+        _params: dict[str, Any] = {
             "dates": dates,
             "season_dates": season_dates,
             "period_length": period_length,
@@ -696,50 +703,11 @@ class TimeSeriesGenerator(Validators):
             "seed": seed,
         }
 
-        params = {key: value for key, value in _params.items() if value is not None}
+        # Filter out empty parameters
+        params: dict[str, Any] = {key: value for key, value in _params.items() if value is not None}
 
-        if func:
-            return func(**params).astype(np.float64)  # type:ignore
-        else:
-            return np.zeros(len(dates)).astype(np.float64)
-
-        # if "fixed" in style and "error" in style:
-        #     assert period_length is not None
-        #     assert period_sd is not None
-        #     assert start_index is not None
-        #     return self.generate_fixed_error_index(
-        #         dates=dates,
-        #         period_length=period_length,
-        #         period_sd=period_sd,
-        #         start_index=start_index,
-        #         seed=seed,
-        #     ).astype(np.float64)
-        # elif "semi" in style and "markov" in style:
-        #     assert period_length is not None
-        #     assert period_sd is not None
-        #     assert start_index is not None
-        #     return self.generate_semi_markov_index(
-        #         dates=dates,
-        #         period_length=period_length,
-        #         period_sd=period_sd,
-        #         start_index=start_index,
-        #         seed=seed,
-        #     ).astype(np.float64)
-        # elif style == "holiday":
-        #     assert season_dates is not None
-        #     return self.generate_holiday_index(dates=dates, season_dates=season_dates).astype(np.float64)
-        # elif "sin" in style and "covar" in style:
-        #     assert period_length is not None
-        #     assert start_index is not None
-        #     return self.generate_sin_covar_index(
-        #         dates=dates, period_length=period_length, start_index=start_index
-        #     ).astype(np.float64)
-        # elif style == "sin":
-        #     assert period_length is not None
-        #     assert start_index is not None
-        #     return self.generate_sin_index(dates=dates, period_length=period_length).astype(np.float64)
-        # else:
-        #     return np.zeros(len(dates)).astype(np.float64)
+        # Call function with parameters
+        return func(**params).astype(np.float64)  # type:ignore
 
     def generate_polynom_trend(
         self,
@@ -948,13 +916,17 @@ class TimeSeriesGenerator(Validators):
         if seed:
             self._set_seed(seed=seed)
 
-        # Noise
+        # Add noise
         u: NDArray[np.float64] = self.random_generator.normal(
             loc=0.0,
             scale=randomwalk_scale,
             size=n_periods,
         )
+
+        # Generate array
         ts: NDArray[np.float64] = np.zeros(n_periods).astype(np.float64)
+
+        # Generate ARMA time series
         for i in range(n_periods):
             for i_ar in range(min(len(AR), i)):
                 ts[i] = ts[i] + AR[i_ar] * ts[i - 1 - i_ar]
@@ -964,6 +936,8 @@ class TimeSeriesGenerator(Validators):
             for exvar in exogenous:
                 for i_ar in range(len(exvar["coeff"])):
                     ts[i] = ts[i] + exvar["coeff"][i_ar] * exvar["ts"][i - i_ar]
+
+        # Return
         return ts
 
     ## --------------------------------------------------------------------------- #
