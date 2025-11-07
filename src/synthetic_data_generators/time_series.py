@@ -131,7 +131,6 @@ class TimeSeriesGenerator(Validators):
             - This helps to catch potential errors early in the development process and improve code readability.
         """
         self._set_seed(seed=seed)
-        self._random_generator: RandomGenerator | None = None
 
     def create_time_series(
         self,
@@ -1024,7 +1023,7 @@ class TimeSeriesGenerator(Validators):
                 The seed value to set for random number generation.
         """
         self._seed: int | None = seed
-        self._random_generator = None
+        self._random_generator: RandomGenerator | None = None
 
     @lru_cache
     def _get_random_generator(self, seed: int | None = None) -> RandomGenerator:
