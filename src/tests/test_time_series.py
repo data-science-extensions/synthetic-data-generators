@@ -310,6 +310,7 @@ class TestTimeSeriesGenerator_FixedErrors(TestCase, Default_Mixin):
             period_length=7,
             period_sd=1,
             start_index=5,
+            seed=111,
         )
         # Verify it returns the correct length and is binary (0s and 1s)
         assert len(_input) == len(self.dates_apr_2025())
@@ -789,7 +790,7 @@ class TestTimeSeriesGenerator_Validations(TestCase, Default_Mixin):
 
     def test_value_is_between_invalid_range(self) -> None:
         with raises(ValueError, match="Invalid range"):
-            self.tsg._value_is_between(0.7, 1.0, 0.5)
+            self.tsg._assert_value_is_between(0.7, 1.0, 0.5)
 
 
 ## --------------------------------------------------------------------------- #
@@ -975,6 +976,7 @@ class TestTimeSeriesGenerator_SemiMarkov(TestCase, Default_Mixin):
             period_length=7,
             period_sd=1,
             start_index=5,
+            seed=123,
         )
         # Verify it returns the correct length and is binary (0s and 1s)
         assert len(_input) == len(self.dates_apr_2025())
