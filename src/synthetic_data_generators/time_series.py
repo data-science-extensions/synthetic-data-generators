@@ -67,6 +67,9 @@ from toolbox_python.collection_types import (
 )
 from typeguard import typechecked
 
+# ## Local First Party Imports ----
+from synthetic_data_generators.utils.validators import Validators
+
 
 ## --------------------------------------------------------------------------- #
 ##  Exports                                                                 ####
@@ -103,7 +106,7 @@ number = Union[float, int]
 ## --------------------------------------------------------------------------- #
 
 
-class TimeSeriesGenerator:
+class TimeSeriesGenerator(Validators):
     """
     !!! note "Summary"
         A class for generating synthetic time series data.
@@ -1108,107 +1111,3 @@ class TimeSeriesGenerator:
                 A list of datetime objects representing the generated holiday dates.
         """
         return TimeSeriesGenerator._get_dates(start_date, n_periods=periods)
-
-    ## --------------------------------------------------------------------------- #
-    ##  Validators                                                              ####
-    ## --------------------------------------------------------------------------- #
-
-    @staticmethod
-    def _value_is_between(value: number, min_value: number, max_value: number) -> bool:
-        """
-        !!! note "Summary"
-            Check if a value is between two other values.
-
-        Params:
-            value (number):
-                The value to check.
-            min_value (number):
-                The minimum value.
-            max_value (number):
-                The maximum value.
-
-        Returns:
-            (bool):
-                True if the value is between the minimum and maximum values, False otherwise.
-        """
-        result: bool = is_valid(value, ">=", min_value) and is_valid(value, "<=", max_value)
-        if not result:
-            raise ValueError(f"Invalid Value: `{value}`. Must be between `{min_value}` and `{max_value}`")
-        return result
-
-    @staticmethod
-    def _assert_value_is_between(
-        value: number,
-        min_value: number,
-        max_value: number,
-    ) -> None:
-        """
-        !!! note "Summary"
-            Assert that a value is between two other values.
-
-        Params:
-            value (number):
-                The value to check.
-            min_value (number):
-                The minimum value.
-            max_value (number):
-                The maximum value.
-
-        Raises:
-            (AssertionError):
-                If the value is not between the minimum and maximum values.
-        """
-        if not TimeSeriesGenerator._value_is_between(value, min_value, max_value):
-            raise AssertionError(f"Value must be between `{min_value}` and `{max_value}`: `{value}`")
-
-    @staticmethod
-    def _all_values_are_between(
-        values: list[number] | tuple[number, ...],
-        min_value: number,
-        max_value: number,
-    ) -> bool:
-        """
-        !!! note "Summary"
-            Check if all values in an array are between two other values.
-
-        Params:
-            values (Union[list[number], tuple[number, ...]]):
-                The array of values to check.
-            min_value (number):
-                The minimum value.
-            max_value (number):
-                The maximum value.
-
-        Returns:
-            (bool):
-                True if all values are between the minimum and maximum values, False otherwise.
-        """
-        return all(TimeSeriesGenerator._value_is_between(value, min_value, max_value) for value in values)
-
-    @staticmethod
-    def _assert_all_values_are_between(
-        values: list[number] | tuple[number, ...],
-        min_value: number,
-        max_value: number,
-    ) -> None:
-        """
-        !!! note "Summary"
-            Assert that all values in an array are between two other values.
-
-        Params:
-            values (Union[list[number], tuple[number, ...]]):
-                The array of values to check.
-            min_value (number):
-                The minimum value.
-            max_value (number):
-                The maximum value.
-
-        Raises:
-            (AssertionError):
-                If any value is not between the minimum and maximum values.
-        """
-        values_not_between: list[number] = [
-            value for value in values if not TimeSeriesGenerator._value_is_between(value, min_value, max_value)
-        ]
-        if not len(values_not_between) == 0:
-            raise AssertionError(f"Values not between `{min_value}` and `{max_value}`: {values_not_between}")
