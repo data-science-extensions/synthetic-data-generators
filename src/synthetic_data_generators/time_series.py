@@ -142,7 +142,7 @@ class TimeSeriesGenerator(Validators):
         MA: Sequence[number] | None = None,
         randomwalk_scale: number = 2,
         exogenous: Sequence[dict[Literal["coeff", "ts"], Sequence[number]]] | None = None,
-        season_conf: dict_str_any | None = {"style": "holiday"},
+        season_conf: dict[str, Any] | None = {"style": "holiday"},
         season_eff: number = 0.15,
         manual_outliers: Sequence[Sequence[int]] | None = None,
         noise_scale: number = 10,
@@ -189,7 +189,7 @@ class TimeSeriesGenerator(Validators):
             exogenous (Sequence[dict[Literal["coeff", "ts"], Sequence[number]]] | None):
                 A list of exogenous variables to include in the ARMA model.<br>
                 Default is `None`.
-            season_conf (dict_str_any | None):
+            season_conf (dict[str, Any] | None):
                 A dictionary containing the configuration for seasonality.<br>
                 Default is `{"style": "holiday"}`.
             season_eff (number):
