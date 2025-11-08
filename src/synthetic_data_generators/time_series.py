@@ -47,11 +47,7 @@ from __future__ import annotations
 from collections.abc import Callable, Sequence
 from datetime import datetime
 from functools import lru_cache
-from typing import (
-    Any,
-    Literal,
-    overload,
-)
+from typing import Any, Literal, overload
 
 # ## Python Third Party Imports ----
 import numpy as np
