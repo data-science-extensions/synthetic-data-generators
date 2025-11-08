@@ -42,19 +42,19 @@ The purpose of this package is to provide  a set of tools for generating synthet
 
 For reference, these URL's are used:
 
-| Type | Source | URL |
-|---|---|---|
-| Git Repo | GitHub | https://github.com/data-science-extensions/synthetic-data-generators |
-| Python Package | PyPI | https://pypi.org/project/synthetic-data-generators |
-| Package Docs | Pages | https://data-science-extensions.com/synthetic-data-generators/ |
+| Type           | Source | URL                                                                  |
+| -------------- | ------ | -------------------------------------------------------------------- |
+| Git Repo       | GitHub | https://github.com/data-science-extensions/synthetic-data-generators |
+| Python Package | PyPI   | https://pypi.org/project/synthetic-data-generators                   |
+| Package Docs   | Pages  | https://data-science-extensions.com/synthetic-data-generators/       |
 
 
 ### Installation
 
-You can install and use this package multiple ways by using [`pip`][pip], [`pipenv`][pipenv], or [`poetry`][poetry].
+You can install and use this package multiple ways by using [`pip`], [`pipenv`], or [`poetry`].
 
 
-#### Using [`pip`][pip]:
+#### Using [`pip`]:
 
 1. In your terminal, run:
 
@@ -77,7 +77,7 @@ You can install and use this package multiple ways by using [`pip`][pip], [`pipe
     ```
 
 
-#### Using [`pipenv`][pipenv]:
+#### Using [`pipenv`]:
 
 1. Install using environment variables:
 
@@ -119,7 +119,7 @@ You can install and use this package multiple ways by using [`pip`][pip], [`pipe
     ```
 
 
-#### Using [`poetry`][poetry]:
+#### Using [`poetry`]:
 
 1. In your `pyproject.toml` file, add:
 
@@ -145,7 +145,7 @@ You can install and use this package multiple ways by using [`pip`][pip], [`pipe
     ```
 
 
-#### Using [`uv`][uv]:
+#### Using [`uv`]:
 
 1. In your `pyproject.toml` file, add:
 
@@ -180,7 +180,7 @@ Contribution is always welcome.
 
 3. Build your environment:
 
-    1. With [`pipenv`][pipenv] on Windows:
+    1. With [`pipenv`] on Windows:
 
         ```pwsh
         if (-not (Test-Path .venv)) {mkdir .venv}
@@ -190,7 +190,7 @@ Contribution is always welcome.
         python -m poetry shell
         ```
 
-    2. With [`pipenv`][pipenv] on Linux:
+    2. With [`pipenv`] on Linux:
 
         ```sh
         mkdir .venv
@@ -200,7 +200,7 @@ Contribution is always welcome.
         python3 -m poetry shell
         ```
 
-    3. With [`poetry`][poetry] on Windows:
+    3. With [`poetry`] on Windows:
 
         ```pwsh
         python -m pip install --upgrade pip
@@ -215,7 +215,7 @@ Contribution is always welcome.
         python -m poetry shell
         ```
 
-    4. With [`poetry`][poetry] on Linux:
+    4. With [`poetry`] on Linux:
 
         ```sh
         python3 -m pip install --upgrade pip
@@ -230,22 +230,22 @@ Contribution is always welcome.
         python3 -m poetry shell
         ```
 
-    4. With [`uv`][uv] on Windows:
+    4. With [`uv`] on Windows:
 
         ```pwsh
         python -m pip install --upgrade pip
         python -m pip install uv
-        python -m uv sync
+        python -m uv sync --all-groups
         python -m uv run pre-commit install
         python -m uv run pre-commit autoupdate
         ```
 
-    5. With [`uv`][uv] on Linux:
+    5. With [`uv`] on Linux:
 
         ```sh
         python3 -m pip install --upgrade pip
         python3 -m pip install uv
-        python3 -m uv sync
+        python3 -m uv sync --all-groups
         python3 -m uv run pre-commit install
         python3 -m uv run pre-commit autoupdate
         ```
@@ -271,24 +271,24 @@ To ensure that the package is working as expected, please ensure that:
 - Run them all together
 
     ```sh
-    uv run make check
+    uv run src/utils/scripts.py check
     ```
 
 - Or run them individually:
 
     - [Black][black]
         ```pysh
-        uv run make check-black
+        uv run src/utils/scripts.py check-black
         ```
 
     - [PyTests][pytest]:
         ```sh
-        uv run make ckeck-pytest
+        uv run src/utils/scripts.py check-pytest
         ```
 
     - [MyPy][mypy]:
         ```sh
-        uv run make check-mypy
+        uv run src/utils/scripts.py check-mypy
         ```
 
 
@@ -301,8 +301,13 @@ To ensure that the package is working as expected, please ensure that:
 [pypi]: https://pypi.org/project/toolbox-python
 [docs]: ...
 [pip]: https://pypi.org/project/pip
+[`pip`]: https://pypi.org/project/pip
 [pipenv]: https://github.com/pypa/pipenv
+[`pipenv`]: https://github.com/pypa/pipenv
 [poetry]: https://python-poetry.org
+[`poetry`]: https://python-poetry.org
+[uv]: https://docs.astral.sh/uv/
+[`uv`]: https://docs.astral.sh/uv/
 [github-fork]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo
 [github-branch]: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-branches
 [github-clone]: https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository
@@ -313,4 +318,3 @@ To ensure that the package is working as expected, please ensure that:
 [pytest]: https://docs.pytest.org
 [mypy]: http://www.mypy-lang.org/
 [black]: https://black.readthedocs.io/
-[uv]: https://docs.astral.sh/uv/
