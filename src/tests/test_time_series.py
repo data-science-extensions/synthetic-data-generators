@@ -20,7 +20,6 @@ import numpy as np
 from numpy.random import Generator as RandomGenerator
 from numpy.typing import NDArray
 from pytest import raises
-from toolbox_python.collection_types import int_list
 
 # ## Local First Party Imports ----
 from synthetic_data_generators.time_series import TimeSeriesGenerator
@@ -328,7 +327,7 @@ class TestTimeSeriesGenerator_FixedErrors(TestCase, Default_Mixin):
     @classmethod
     def setUpClass(cls) -> None:
         cls.tsg = TimeSeriesGenerator(cls.seed)
-        cls.interpolation_nodes: list[int_list] = [[len(cls.dates_apr_2025()) * i // 4, 100 * i] for i in range(4)]
+        cls.interpolation_nodes: list[list[int]] = [[len(cls.dates_apr_2025()) * i // 4, 100 * i] for i in range(4)]
         # [[0, 0], [7, 100], [15, 200], [22, 300]]
 
     def test_errors_one_week(self) -> None:

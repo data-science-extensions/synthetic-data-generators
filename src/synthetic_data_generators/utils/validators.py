@@ -23,7 +23,6 @@ from __future__ import annotations
 
 # ## Python StdLib Imports ----
 from collections.abc import Sequence
-from typing import Union
 
 # ## Python Third Party Imports ----
 from toolbox_python.checkers import is_valid
@@ -42,7 +41,7 @@ __all__: list[str] = ["Validators", "number"]
 ## --------------------------------------------------------------------------- #
 
 
-number = Union[float, int]
+number = float | int
 
 
 # ---------------------------------------------------------------------------- #
