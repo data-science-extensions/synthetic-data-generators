@@ -1,13 +1,7 @@
 # ============================================================================ #
 #                                                                              #
-#     Title: Title                                                             #
-#     Purpose: Purpose                                                         #
-#     Notes: Notes                                                             #
-#     Author: chrimaho                                                         #
-#     Created: Created                                                         #
-#     References: References                                                   #
-#     Sources: Sources                                                         #
-#     Edited: Edited                                                           #
+#     Title: Validators Utility Module                                         #
+#     Purpose: Provides validation functions and classes for numeric ranges    #
 #                                                                              #
 # ============================================================================ #
 
