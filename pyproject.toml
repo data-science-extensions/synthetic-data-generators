@@ -1,6 +1,6 @@
 [project]
 name = "synthetic-data-generators"
-version = "1.1.0"
+version = "1.2.0"
 description = "Helper methods for generating synthetic data for testing and development."
 readme = "README.md"
 license = "MIT"
