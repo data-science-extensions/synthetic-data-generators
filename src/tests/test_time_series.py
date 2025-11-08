@@ -12,17 +12,97 @@
 
 # ## Python StdLib Imports ----
 from datetime import datetime
-from functools import lru_cache
+from functools import lru_cache, partial
 from unittest import TestCase
 
 # ## Python Third Party Imports ----
 import numpy as np
+from numpy.random import Generator as RandomGenerator
 from numpy.typing import NDArray
 from pytest import raises
 from toolbox_python.collection_types import int_list
 
 # ## Local First Party Imports ----
 from synthetic_data_generators.time_series import TimeSeriesGenerator
+
+
+## --------------------------------------------------------------------------- #
+##  Constants                                                               ####
+## --------------------------------------------------------------------------- #
+
+
+RELATIVE_TOLERANCE = 1e-7
+ABSOLUTE_TOLERANCE = 1e-10
+
+
+## --------------------------------------------------------------------------- #
+##  Partials                                                                ####
+## --------------------------------------------------------------------------- #
+
+
+assert_all_close = partial(
+    np.testing.assert_allclose,
+    rtol=RELATIVE_TOLERANCE,
+    atol=ABSOLUTE_TOLERANCE,
+    err_msg="Numeric values do not match between actual and expected time series.",
+)
+
+
+# ---------------------------------------------------------------------------- #
+#                                                                              #
+#     Helper Functions                                                      ####
+#                                                                              #
+# ---------------------------------------------------------------------------- #
+
+
+def assert_timeseries_equal(
+    actual: list[list[str | float]],
+    expected: list[list[str | float]],
+) -> None:
+    """
+    !!! note "Summary"
+        Compare two time series with tolerance for floating-point differences.
+
+    ???+ abstract "Details"
+        - This helper function ensures tests pass consistently across different platforms (Ubuntu, macOS, Windows) and CPU architectures (x86-64, ARM64).
+        - Different operating systems and CPU architectures use different math library implementations, which can produce slightly different floating-point results in the last decimal places.
+        - The function compares date strings exactly and numeric values with configurable relative and absolute tolerances.
+        - Uses `numpy.testing.assert_allclose()` for robust floating-point comparison.
+        - Provides clear error messages indicating which row failed and the expected vs actual values.
+
+    Params:
+        actual (list[list[str | float]]):
+            The actual time series data from the test.<br>
+            Each inner list contains [date_string, numeric_value].
+        expected (list[list[str | float]]):
+            The expected time series data.<br>
+            Each inner list contains [date_string, numeric_value].
+
+    Raises:
+        (AssertionError):
+            If the time series lengths don't match.
+        (AssertionError):
+            If any date strings don't match exactly.
+        (AssertionError):
+            If any numeric values differ beyond the specified tolerances.
+    """
+
+    # Initial length checks
+    assert len(actual) == len(expected), f"Length mismatch: {len(actual)} != {len(expected)}"
+    assert all(len(a) == 2 for a in actual), "Actual time series rows must each have exactly 2 elements."
+    assert all(len(e) == 2 for e in expected), "Expected time series rows must each have exactly 2 elements."
+
+    # Extract dates and values
+    actual_dates: list[str] = [row[0] for row in actual]  # type:ignore
+    expected_dates: list[str] = [row[0] for row in expected]  # type:ignore
+    actual_values: list[float] = [row[1] for row in actual]  # type:ignore
+    expected_values: list[float] = [row[1] for row in expected]  # type:ignore
+
+    # Compare dates exactly
+    assert actual_dates == expected_dates, "Date strings do not match between actual and expected time series."
+
+    # Compare numeric values with tolerance
+    assert_all_close(actual=actual_values, desired=expected_values)
 
 
 # ---------------------------------------------------------------------------- #
@@ -61,7 +141,7 @@ class TestTimeSeriesGenerator_Generics(TestCase, Default_Mixin):
     def test_random_generator_2(self) -> None:
         _input: list[float] = self.tsg._get_random_generator(seed=self.seed).normal(loc=0, scale=1, size=10).tolist()
         _expected: list[float] = np.random.default_rng(self.seed).normal(loc=0, scale=1, size=10).tolist()
-        assert _input == _expected
+        assert_all_close(_input, _expected)
 
     def test_generate_dates(self) -> None:
         _input: list[datetime] = self.dates_apr_2025()
@@ -117,7 +197,7 @@ class TestTimeSeriesGenerator_Linear(TestCase, Default_Mixin):
             ["2019-01-19", 374.4366886930567],
             ["2019-01-20", 394.02941798254517],
         ]
-        assert _input == _expected
+        assert_timeseries_equal(_input, _expected)
 
     def test_smooth_curve(self) -> None:
         _input: list[list[str | float]] = (
@@ -156,7 +236,7 @@ class TestTimeSeriesGenerator_Linear(TestCase, Default_Mixin):
             ["2019-01-19", 209.75600614035255],
             ["2019-01-20", 292.83154439346896],
         ]
-        assert _input == _expected
+        assert_timeseries_equal(_input, _expected)
 
     def test_smooth_curve_with_level_breaks(self) -> None:
         _input: list[list[str | float]] = (
@@ -195,7 +275,7 @@ class TestTimeSeriesGenerator_Linear(TestCase, Default_Mixin):
             ["2019-01-19", 354.98006144844095],
             ["2019-01-20", 376.9488141498327],
         ]
-        assert _input == _expected
+        assert_timeseries_equal(_input, _expected)
 
     def test_smooth_curve_with_outliers(self) -> None:
         _input: list[list[str | float]] = (
@@ -235,7 +315,7 @@ class TestTimeSeriesGenerator_Linear(TestCase, Default_Mixin):
             ["2019-01-19", 361.82000289927805],
             ["2019-01-20", 383.5206474785241],
         ]
-        assert _input == _expected
+        assert_timeseries_equal(_input, _expected)
 
 
 ## --------------------------------------------------------------------------- #
@@ -301,7 +381,7 @@ class TestTimeSeriesGenerator_FixedErrors(TestCase, Default_Mixin):
             ["2025-04-29", 421.4448856605953],
             ["2025-04-30", 433.97154148111997],
         ]
-        assert _input == _expected
+        assert_timeseries_equal(_input, _expected)
 
     def test_generate_fixed_error_index_directly(self) -> None:
         """Test generate_fixed_error_index method directly - this exercises the method"""
@@ -370,7 +450,7 @@ class TestTimeSeriesGenerator_Seasonalities(TestCase, Default_Mixin):
             0.0,  # 29th: Tue
             0.0,  # 30th: Wed
         ]
-        assert _output == _expected
+        assert_all_close(_output, _expected)
 
     def test_seasonal_sine(self) -> None:
         _input: list[datetime] = self.dates_apr_2025()
@@ -412,7 +492,7 @@ class TestTimeSeriesGenerator_Seasonalities(TestCase, Default_Mixin):
             0.4999999999999995,
             0.8909157412340156,
         ]
-        assert _output == _expected
+        assert_all_close(_output, _expected)
 
     def test_seasonal_sine_covar(self) -> None:
         _input: list[datetime] = self.dates_apr_2025()
@@ -454,7 +534,7 @@ class TestTimeSeriesGenerator_Seasonalities(TestCase, Default_Mixin):
             0.012526004102890335,
             -0.5250053705158881,
         ]
-        assert _output == _expected
+        assert_all_close(_output, _expected)
 
 
 ## --------------------------------------------------------------------------- #
@@ -511,7 +591,7 @@ class TestTimeSeriesGenerator_Creation(TestCase, Default_Mixin):
             ["2019-01-19", 363.3560061403529],
             ["2019-01-20", 384.0315443934706],
         ]
-        assert _output == _expected
+        assert_timeseries_equal(_output, _expected)
 
     def test_linear_trend_with_level_breaks(self) -> None:
         n_periods = 20
@@ -557,7 +637,7 @@ class TestTimeSeriesGenerator_Creation(TestCase, Default_Mixin):
             ["2019-01-19", 263.3560061403529],
             ["2019-01-20", 284.0315443934706],
         ]
-        assert _output == _expected
+        assert_timeseries_equal(_output, _expected)
 
     def test_linear_trend_with_outliers(self) -> None:
         n_periods = 20
@@ -603,7 +683,7 @@ class TestTimeSeriesGenerator_Creation(TestCase, Default_Mixin):
             ["2019-01-19", 363.3560061403529],
             ["2019-01-20", 384.0315443934706],
         ]
-        assert _output == _expected
+        assert_timeseries_equal(_output, _expected)
 
     def test_linear_trend_with_seasonality(self) -> None:
         n_periods = 20
@@ -649,7 +729,7 @@ class TestTimeSeriesGenerator_Creation(TestCase, Default_Mixin):
             ["2019-01-19", 311.93057024901435],
             ["2019-01-20", 381.62442624197485],
         ]
-        assert _output == _expected
+        assert_timeseries_equal(_output, _expected)
 
     def test_sine_trend(self) -> None:
         n_periods = 20
@@ -695,7 +775,7 @@ class TestTimeSeriesGenerator_Creation(TestCase, Default_Mixin):
             ["2019-01-19", 260.50513435767573],
             ["2019-01-20", 379.2173080904791],
         ]
-        assert _output == _expected
+        assert_timeseries_equal(_output, _expected)
 
     def test_sine_covar_trend(self) -> None:
         n_periods = 20
@@ -741,7 +821,7 @@ class TestTimeSeriesGenerator_Creation(TestCase, Default_Mixin):
             ["2019-01-19", 488.14499036175687],
             ["2019-01-20", 696.0369582115629],
         ]
-        assert _output == _expected
+        assert_timeseries_equal(_output, _expected)
 
 
 ## --------------------------------------------------------------------------- #
@@ -952,9 +1032,6 @@ class TestTimeSeriesGenerator_Properties(TestCase, Default_Mixin):
 
     def test_random_generator_property(self) -> None:
         """Test that the random_generator property returns a RandomGenerator"""
-        # ## Python Third Party Imports ----
-        from numpy.random import Generator as RandomGenerator
-
         assert isinstance(self.tsg.random_generator, RandomGenerator)
 
 
