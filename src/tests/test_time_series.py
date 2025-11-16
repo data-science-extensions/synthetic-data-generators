@@ -535,6 +535,248 @@ class TestTimeSeriesGenerator_Seasonalities(TestCase, Default_Mixin):
         ]
         assert_all_close(_output, _expected)
 
+    def test_seasonal_sine_with_custom_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()
+        _output: list[float] = self.tsg.generate_season_index(
+            dates=_input,
+            style="sin",
+            period_length=7,
+            start_index=0,
+            amplitude=0.3,
+        ).tolist()
+        _expected: list[float] = [
+            0.7,
+            0.9345494447404089,
+            0.992478373654547,
+            0.8301651217352675,
+            0.5698348782647326,
+            0.40752162634545286,
+            0.465450555259591,
+            0.6999999999999998,
+            0.9345494447404088,
+            0.992478373654547,
+            0.8301651217352675,
+            0.5698348782647327,
+            0.4075216263454529,
+            0.4654505552595909,
+            0.6999999999999998,
+            0.9345494447404088,
+            0.992478373654547,
+            0.830165121735268,
+            0.5698348782647327,
+            0.4075216263454529,
+            0.4654505552595909,
+            0.6999999999999997,
+            0.9345494447404088,
+            0.992478373654547,
+            0.8301651217352677,
+            0.5698348782647328,
+            0.40752162634545297,
+            0.4654505552595909,
+            0.6999999999999996,
+            0.9345494447404094,
+        ]
+        assert_all_close(_output, _expected)
+
+    def test_seasonal_sine_with_full_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()
+        _output: list[float] = self.tsg.generate_season_index(
+            dates=_input,
+            style="sin",
+            period_length=7,
+            start_index=0,
+            amplitude=1.0,
+        ).tolist()
+        _expected: list[float] = [
+            0.0,
+            0.7818314824680298,
+            0.9749279121818236,
+            0.4338837391175582,
+            -0.43388373911755823,
+            -0.9749279121818237,
+            -0.7818314824680301,
+            -2.4492935982947064e-16,
+            0.7818314824680294,
+            0.9749279121818238,
+            0.43388373911755867,
+            -0.4338837391175578,
+            -0.9749279121818235,
+            -0.7818314824680299,
+            -4.898587196589413e-16,
+            0.7818314824680294,
+            0.9749279121818238,
+            0.43388373911756017,
+            -0.43388373911755756,
+            -0.9749279121818235,
+            -0.7818314824680304,
+            -7.347880794884119e-16,
+            0.7818314824680294,
+            0.974927912181824,
+            0.4338837391175591,
+            -0.4338837391175574,
+            -0.9749279121818234,
+            -0.7818314824680307,
+            -9.797174393178826e-16,
+            0.7818314824680311,
+        ]
+        assert_all_close(_output, _expected)
+
+    def test_seasonal_sine_with_zero_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()
+        _output: list[float] = self.tsg.generate_season_index(
+            dates=_input,
+            style="sin",
+            period_length=7,
+            start_index=0,
+            amplitude=0.0,
+        ).tolist()
+        # With amplitude=0, all values should be 1.0
+        _expected: list[float] = [1.0] * 30
+        assert_all_close(_output, _expected)
+
+    def test_seasonal_sine_covar_with_custom_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()
+        _output: list[float] = self.tsg.generate_season_index(
+            dates=_input,
+            style="sin_covar",
+            period_length=7,
+            start_index=0,
+            amplitude=0.5,
+        ).tolist()
+        _expected: list[float] = [
+            0.19470917115432524,
+            0.36384428674181375,
+            0.47365876937554614,
+            0.49649576985411514,
+            0.4189386934900251,
+            0.24857663186527954,
+            0.016765860186878456,
+            -0.22486454118956765,
+            -0.4150051090366955,
+            -0.4988790947395272,
+            -0.44599630970175824,
+            -0.263524242877141,
+            0.0006212646108373434,
+            0.2683369490998272,
+            0.45425312006094683,
+            0.4944531197657359,
+            0.3708256517138548,
+            0.12099399030105354,
+            -0.17171724440025075,
+            -0.40622367924341417,
+            -0.4998675484951518,
+            -0.4190563935785789,
+            -0.19211496999596865,
+            0.10099656487620458,
+            0.3581125994085441,
+            0.4918047361646154,
+            0.45957658124353584,
+            0.27640451098151965,
+            0.006263002051445168,
+            -0.26250268525794405,
+        ]
+        assert_all_close(_output, _expected)
+
+    def test_seasonal_sine_covar_with_increased_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()
+        _output: list[float] = self.tsg.generate_season_index(
+            dates=_input,
+            style="sin_covar",
+            period_length=7,
+            start_index=0,
+            amplitude=2.0,
+        ).tolist()
+        _expected: list[float] = [
+            0.778836684617301,
+            1.455377146967255,
+            1.8946350775021846,
+            1.9859830794164606,
+            1.6757547739601004,
+            0.9943065274611182,
+            0.06706344074751382,
+            -0.8994581647582706,
+            -1.660020436146782,
+            -1.9955163789581088,
+            -1.783985238807033,
+            -1.054096971508564,
+            0.0024850584433493738,
+            1.0733477963993088,
+            1.8170124802437874,
+            1.9778124790629436,
+            1.4833026068554192,
+            0.48397596120421416,
+            -0.686868977601003,
+            -1.6248947169736566,
+            -1.9994701939806072,
+            -1.6762255743143156,
+            -0.7684598799838746,
+            0.4039862595048183,
+            1.4324503976341764,
+            1.9672189446584616,
+            1.8383063249741434,
+            1.1056180439260786,
+            0.02505200820578067,
+            -1.0500107410317762,
+        ]
+        assert_all_close(_output, _expected)
+
+    def test_seasonal_sine_covar_with_zero_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()
+        _output: list[float] = self.tsg.generate_season_index(
+            dates=_input,
+            style="sin_covar",
+            period_length=7,
+            start_index=0,
+            amplitude=0.0,
+        ).tolist()
+        # With amplitude=0, all values should be 0.0
+        _expected: list[float] = [0.0] * 30
+        assert_all_close(_output, _expected)
+
+    def test_generate_sin_index_directly_with_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()[:10]
+        _output: list[float] = self.tsg.generate_sin_index(
+            dates=_input,
+            period_length=7,
+            start_index=4,
+            amplitude=0.25,
+        ).tolist()
+        _expected: list[float] = [
+            0.8584709347793895,
+            0.6415290652206105,
+            0.5062680219545441,
+            0.5545421293829925,
+            0.75,
+            0.9454578706170075,
+            0.9937319780454559,
+            0.8584709347793895,
+            0.6415290652206105,
+            0.5062680219545441,
+        ]
+        assert_all_close(_output, _expected)
+
+    def test_generate_sin_covar_index_directly_with_amplitude(self) -> None:
+        _input: list[datetime] = self.dates_apr_2025()[:10]
+        _output: list[float] = self.tsg.generate_sin_covar_index(
+            dates=_input,
+            period_length=7,
+            start_index=4,
+            amplitude=1.5,
+        ).tolist()
+        _expected: list[float] = [
+            0.5017137378685711,
+            0.9623567215242764,
+            1.3134432988174158,
+            1.4893907053178208,
+            1.4411704075884177,
+            1.1511771020004478,
+            0.645751638796177,
+            0.000815532667781747,
+            -0.6637806649422798,
+            -1.203751803899342,
+        ]
+        assert_all_close(_output, _expected)
+
 
 ## --------------------------------------------------------------------------- #
 ##  TimeSeriesGenerator: Creation                                           ####

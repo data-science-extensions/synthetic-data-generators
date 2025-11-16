@@ -491,27 +491,36 @@ class TimeSeriesGenerator(Validators):
         dates: Sequence[datetime],
         period_length: int = 7,
         start_index: int = 4,
+        amplitude: number = 0.5,
     ) -> NDArray[np.float64]:
         """
         !!! note "Summary"
             Generate a sine seasonality index for the given dates.
 
         ???+ abstract "Details"
-            - A sine seasonality index is a periodic function that oscillates between `0` and `1`.
+            - A sine seasonality index is a periodic function that oscillates around a center value.
             - It is used to model seasonal patterns in time series data.
-            - The return array is a sine wave of length `n_periods`, with a period of `period_length` and a phase shift of `start_index`.
+            - The return array is a sine wave of length `n_periods`, with a period of `period_length`, a phase shift of `start_index`, and an amplitude of `amplitude`.
             - The result can be used to represent seasonal patterns in time series data, such as daily or weekly cycles.
+            - With default `amplitude=0.5`, the wave oscillates between `0` and `1` (centered at `0.5`).
+            - The formula used is: `amplitude * sin(...) + (1 - amplitude)`, which ensures the wave oscillates between `(1 - 2*amplitude)` and `1`.
 
         Params:
             dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
             period_length (int):
-                The length of the period for seasonality.<br>
+                The length of the period for seasonality. This is the wavelength of the sine wave.<br>
                 For example, if the frequency is weekly, this would be `7`.<br>
                 Default is `7`.
             start_index (int):
                 The starting index for the seasonality. Designed to account for seasonal patterns that start at a different point in time.<br>
                 Default is `4`.
+            amplitude (number):
+                The amplitude of the sine wave, controlling the range of oscillation.<br>
+                With `amplitude=0.5` (default), the wave oscillates between `0` and `1`.<br>
+                With `amplitude=0.3`, the wave oscillates between `0.4` and `1`.<br>
+                With `amplitude=1.0`, the wave oscillates between `-1` and `1`.<br>
+                Default is `0.5`.
 
         Raises:
             (TypeCheckError):
@@ -522,7 +531,7 @@ class TimeSeriesGenerator(Validators):
                 An array of the same length as `dates`, where each element is a sine value representing the seasonal pattern.
         """
         n_periods: int = len(dates)
-        events = (np.sin((np.arange(n_periods) - start_index) / period_length * 2 * np.pi) + 1) / 2
+        events = amplitude * np.sin((np.arange(n_periods) - start_index) / period_length * 2 * np.pi) + (1 - amplitude)
         return events
 
     def generate_sin_covar_index(
@@ -530,27 +539,35 @@ class TimeSeriesGenerator(Validators):
         dates: Sequence[datetime],
         period_length: int = 7,
         start_index: int = 4,
+        amplitude: number = 1.0,
     ) -> NDArray[np.float64]:
         """
         !!! note "Summary"
             Generate a sine seasonality index with covariance for the given dates.
 
         ???+ abstract "Details"
-            - A sine seasonality index with covariance is a periodic function that oscillates between `0` and `1`.
+            - A sine seasonality index with covariance is a periodic function with varying frequency.
             - It is used to model seasonal patterns in time series data, taking into account the covariance structure of the data.
-            - The return array is a sine wave of length `n_periods`, with a period of `period_length` and a phase shift of `start_index`.
-            - The result can be used to represent seasonal patterns in time series data, such as daily or weekly cycles.
+            - The return array is a sine wave of length `n_periods`, with a period of `period_length`, a phase shift of `start_index`, and controlled amplitude.
+            - The result can be used to represent seasonal patterns in time series data, such as daily or weekly cycles with varying intensity.
+            - Unlike the simple sine index, this method applies a covariance wave to create a more complex, non-uniform seasonal pattern.
 
         Params:
             dates (Sequence[datetime]):
                 List of datetime objects representing the dates to check.
             period_length (int):
-                The length of the period for seasonality.<br>
+                The length of the period for seasonality. This is the wavelength of the sine wave.<br>
                 For example, if the frequency is weekly, this would be `7`.<br>
                 Default is `7`.
             start_index (int):
                 The starting index for the seasonality. Designed to account for seasonal patterns that start at a different point in time.<br>
                 Default is `4`.
+            amplitude (number):
+                The amplitude multiplier for the sine wave, controlling the range of oscillation.<br>
+                With `amplitude=1.0` (default), the wave oscillates in its natural range (approximately `-1` to `1`).<br>
+                With `amplitude=0.5`, the wave oscillates in a reduced range (approximately `-0.5` to `0.5`).<br>
+                With `amplitude=2.0`, the wave oscillates in an expanded range (approximately `-2` to `2`).<br>
+                Default is `1.0`.
 
         Raises:
             (TypeCheckError):
@@ -563,7 +580,7 @@ class TimeSeriesGenerator(Validators):
         n_periods: int = len(dates)
         covar_wave = (np.sin((np.arange(n_periods) - start_index) / period_length / 6 * np.pi) + 2) / 2
         dx: NDArray[np.float64] = np.full_like(covar_wave, 0.4)
-        sin_wave: NDArray[np.float64] = np.sin((covar_wave * dx).cumsum())
+        sin_wave: NDArray[np.float64] = amplitude * np.sin((covar_wave * dx).cumsum())
         return sin_wave
 
     @overload
@@ -605,6 +622,7 @@ class TimeSeriesGenerator(Validators):
         *,
         period_length: int | None = None,
         start_index: int | None = None,
+        amplitude: number | None = None,
         seed: int | None = None,
     ) -> NDArray[np.float64]: ...
     @overload
@@ -615,6 +633,7 @@ class TimeSeriesGenerator(Validators):
         *,
         period_length: int,
         start_index: int,
+        amplitude: number | None = None,
         seed: int | None = None,
     ) -> NDArray[np.float64]: ...
     def generate_season_index(
@@ -632,6 +651,7 @@ class TimeSeriesGenerator(Validators):
         period_length: int | None = None,
         period_sd: number | None = None,
         start_index: int | None = None,
+        amplitude: number | None = None,
         seed: int | None = None,
     ) -> NDArray[np.float64]:
         """
@@ -696,6 +716,7 @@ class TimeSeriesGenerator(Validators):
             "period_length": period_length,
             "period_sd": period_sd,
             "start_index": start_index,
+            "amplitude": amplitude,
             "seed": seed,
         }
 
