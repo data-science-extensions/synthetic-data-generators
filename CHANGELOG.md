@@ -9,6 +9,328 @@
 .md-nav--secondary .md-nav__list .md-nav__list { display: none; }
 </style>
 
+!!! info "v1.3.0"
+
+    ## **v1.3.0: Amplitude Control for Seasonal Patterns**
+
+    <!-- md:tag v1.3.0 --><br>
+    <!-- md:date 2025-11-16 --><br>
+    <!-- md:link [data-science-extensions/synthetic-data-generators/releases/v1.3.0](https://github.com/data-science-extensions/synthetic-data-generators/releases/tag/v1.3.0) -->
+
+    ??? note "Release Notes"
+
+        ### 📋 Release Overview
+        
+        Introduce configurable amplitude control for sine-based seasonal index generation, enabling users to precisely control the oscillation range and intensity of seasonal patterns in synthetic time series data. This release also includes Python version support updates and automated changelog generation capabilities.
+        
+        
+        ### 🎯 What's New
+        
+        
+        #### ✨ Amplitude Control for Seasonal Indices
+        
+        Add comprehensive amplitude control to sine-based seasonality generation, allowing users to customise the range and intensity of seasonal oscillations:
+        
+        **Key Features:**
+        - **Configurable Amplitude Parameter**: Add `amplitude` parameter to `generate_sin_index()` and `generate_sin_covar_index()` methods
+        - **Backwards Compatible**: Default values maintain existing behaviour for seamless upgrades
+        - **Flexible Range Control**: Scale seasonal patterns from flat lines to amplified oscillations
+        - **Enhanced Documentation**: Comprehensive docstrings with examples and mathematical details
+        
+        
+        #### 📦 Pull Request #7: Amplitude Control Implementation
+        
+        Merge comprehensive amplitude parameter support through PR #7:
+        
+        **Enhanced Methods:**
+        
+        1. **`generate_sin_index()` Method**
+           - Add `amplitude: number = 0.5` parameter
+           - Update formula: `amplitude * sin(...) + (1 - amplitude)`
+           - Wave oscillates between `(1 - 2*amplitude)` and `1`
+           - Default behaviour: Range `0` to `1` (unchanged)
+        
+        2. **`generate_sin_covar_index()` Method**
+           - Add `amplitude: number = 1.0` parameter
+           - Update formula: `amplitude * sin((covar_wave * dx).cumsum())`
+           - Natural range approximately `-1` to `1` with default amplitude
+           - Supports scaling to custom ranges
+        
+        3. **`generate_season_index()` Wrapper**
+           - Expose `amplitude` parameter for both `'sin'` and `'sin_covar'` styles
+           - Add proper type hints and overload declarations
+           - Maintain compatibility with existing code
+        
+        **Mathematical Formulas:**
+        
+        ```python
+        # Simple sine index
+        output = amplitude * np.sin((index - start_index) / period_length * np.pi) + (
+            1 - amplitude
+        )
+
+        # Covariance sine index
+        sin_wave = amplitude * np.sin((covar_wave * dx).cumsum())
+        ```
+        
+        **Use Cases:**
+        - Reduced seasonal variation: `amplitude=0.3` (range `0.4` to `1`)
+        - Standard seasonal pattern: `amplitude=0.5` (range `0` to `1`)
+        - Full range oscillation: `amplitude=1.0` (range `-1` to `1`)
+        - Amplified seasonality: `amplitude=2.0` (expanded range)
+        - No seasonality: `amplitude=0` (flat line)
+        
+        
+        ### 🧪 Test Coverage Improvements
+        
+        Add **8 new comprehensive test methods** to validate amplitude parameter functionality:
+        
+        
+        #### New Test Methods
+        
+        1. **`test_seasonal_sine_with_custom_amplitude()`**
+           - Validate `style="sin"` with `amplitude=0.3`
+           - Confirm reduced oscillation range (`0.4` to `1`)
+        
+        2. **`test_seasonal_sine_with_full_amplitude()`**
+           - Validate `style="sin"` with `amplitude=1.0`
+           - Confirm full range behaviour (`-1` to `1`)
+        
+        3. **`test_seasonal_sine_with_zero_amplitude()`**
+           - Test edge case with `amplitude=0`
+           - Confirm flat line output (constant `1.0`)
+        
+        4. **`test_seasonal_sine_covar_with_custom_amplitude()`**
+           - Validate `style="sin_covar"` with `amplitude=0.5`
+           - Confirm reduced oscillation range
+        
+        5. **`test_seasonal_sine_covar_with_increased_amplitude()`**
+           - Validate `style="sin_covar"` with `amplitude=2.0`
+           - Confirm expanded oscillation range
+        
+        6. **`test_seasonal_sine_covar_with_zero_amplitude()`**
+           - Test edge case with `amplitude=0`
+           - Confirm flat line output (constant `0.0`)
+        
+        7. **`test_generate_sin_index_directly_with_amplitude()`**
+           - Test direct method call with `amplitude=0.25`
+           - Verify formula application
+        
+        8. **`test_generate_sin_covar_index_directly_with_amplitude()`**
+           - Test direct method call with `amplitude=1.5`
+           - Verify multiplier effect
+        
+        
+        #### Coverage Statistics
+        
+        - **Total Tests**: 50 (8 new tests added)
+        - **Code Coverage**: 100% maintained
+        - **Test Scenarios**: Multiple amplitude values (`0.0`, `0.25`, `0.3`, `0.5`, `1.0`, `1.5`, `2.0`)
+        - **Edge Cases**: Zero amplitude, negative amplitude support
+        - **Cross-Platform**: Float tolerance validation on Ubuntu, macOS, Windows
+        
+        
+        ### 🔧 CI/CD and Infrastructure Updates
+        
+        
+        #### Python Version Support
+        
+        Drop Python 3.9 support to align with modern Python ecosystem:
+        
+        - **Remove**: Python 3.9 from CI/CD test matrices
+        - **Supported Versions**: `3.10`, `3.11`, `3.12`, `3.13`, `3.14`
+        - **Rationale**: Python 3.9 reached end-of-life status
+        - **Files Updated**: 
+          - `.github/workflows/ci.yml`
+          - `.github/workflows/cd.yml`
+        
+        
+        #### Automated Changelog Generation
+        
+        Add automated changelog generation from GitHub releases:
+        
+        - **Fetch**: Release tags and commits via GitHub API
+        - **Format**: Markdown with Material for MkDocs styling
+        - **Include**: Release metadata, dates, notes in collapsible sections
+        - **List**: Commits with author attribution and links
+        - **Filter**: Merge commits, version bumps, changelog updates
+        - **Require**: `GITHUB_TOKEN` and `REPOSITORY_NAME` environment variables
+        - **Output**: `CHANGELOG.md` with automatic formatting via `blacken-docs`
+        
+        
+        ### 📊 Technical Details
+        
+        
+        #### Files Changed
+        
+        **4 files modified** with **274 insertions**, **11 deletions**:
+        
+        | File                                           | Insertions | Deletions | Purpose                                            |
+        | ---------------------------------------------- | ---------- | --------- | -------------------------------------------------- |
+        | `src/synthetic_data_generators/time_series.py` | 30         | 9         | Add amplitude parameters and enhance documentation |
+        | `src/tests/test_time_series.py`                | 242        | 0         | Add comprehensive test coverage                    |
+        | `.github/workflows/ci.yml`                     | 1          | 1         | Drop Python 3.9 support                            |
+        | `.github/workflows/cd.yml`                     | 1          | 1         | Drop Python 3.9 support                            |
+        
+        
+        #### API Changes
+        
+        **New Optional Parameters:**
+        
+        ```python
+        def generate_sin_index(
+            self,
+            dates: Sequence[datetime],
+            period_length: int = 7,
+            start_index: int = 4,
+            amplitude: number = 0.5,  # NEW
+        ) -> NDArray[np.float64]: ...
+
+
+        def generate_sin_covar_index(
+            self,
+            dates: Sequence[datetime],
+            period_length: int = 7,
+            start_index: int = 4,
+            amplitude: number = 1.0,  # NEW
+        ) -> NDArray[np.float64]: ...
+
+
+        def generate_season_index(
+            self,
+            dates: Sequence[datetime],
+            style: Literal["holidays", "sin", "sin_covar", "semi-markov"],
+            # ... other parameters ...
+            amplitude: number | None = None,  # NEW
+            seed: int | None = None,
+        ) -> NDArray[np.float64]: ...
+        ```
+        
+        
+        #### Backwards Compatibility
+        
+        ✅ **Fully backwards compatible** - all changes are additive:
+        
+        - New `amplitude` parameter is optional with sensible defaults
+        - Default values produce identical output to previous versions
+        - No breaking changes to existing method signatures
+        - Existing code continues to work without modification
+        
+        
+        ### 🚀 Usage Examples
+        
+        
+        #### Example 1: Reduced Seasonal Variation
+        
+        ```python
+        from datetime import datetime
+        from synthetic_data_generators import TimeSeriesGenerator
+
+        tsg = TimeSeriesGenerator(seed=42)
+        dates = [datetime(2025, 1, i) for i in range(1, 31)]
+
+        # Generate seasonal pattern with reduced amplitude
+        seasonal_index = tsg.generate_season_index(
+            dates=dates,
+            style="sin",
+            period_length=7,
+            start_index=0,
+            amplitude=0.3,  # Reduced oscillation (range: 0.4 to 1)
+        )
+        ```
+        
+        
+        #### Example 2: Amplified Seasonal Effects
+        
+        ```python
+        # Generate seasonal pattern with amplified amplitude
+        seasonal_index = tsg.generate_season_index(
+            dates=dates,
+            style="sin_covar",
+            period_length=7,
+            start_index=4,
+            amplitude=2.0,  # Expanded oscillation (range: approx -2 to 2)
+        )
+        ```
+        
+        
+        #### Example 3: Flat Seasonal Pattern
+        
+        ```python
+        # Generate flat seasonal pattern (no variation)
+        seasonal_index = tsg.generate_season_index(
+            dates=dates,
+            style="sin",
+            period_length=7,
+            start_index=0,
+            amplitude=0.0,  # No oscillation (constant value of 1.0)
+        )
+        ```
+        
+        
+        #### Example 4: Direct Method Usage
+        
+        ```python
+        # Use methods directly for fine-grained control
+        sin_index = tsg.generate_sin_index(
+            dates=dates, period_length=7, start_index=4, amplitude=0.25  # Custom amplitude
+        )
+
+        sin_covar_index = tsg.generate_sin_covar_index(
+            dates=dates,
+            period_length=7,
+            start_index=4,
+            amplitude=1.5,  # Custom amplitude multiplier
+        )
+        ```
+        
+        ### 🎁 Benefits
+        
+        This release provides several key benefits:
+        
+        1. **Enhanced Flexibility**: Control seasonal pattern intensity without post-processing
+        2. **Backwards Compatible**: Seamless upgrades with no breaking changes
+        3. **Well Documented**: Comprehensive docstrings with concrete examples
+        4. **Thoroughly Tested**: 100% code coverage with 8 new test methods
+        5. **Production Ready**: Full CI/CD validation across multiple platforms
+        6. **Mathematical Clarity**: Clear formulas explaining amplitude behaviour
+        7. **Modern Python**: Support for Python 3.10-3.14 only
+        
+        
+        ### 🔗 Related Resources
+        
+        - **Pull Request**: #7 - Add Amplitude Control to Sine-Based Seasonal Index Generation
+        - **Documentation**: Enhanced method docstrings with amplitude examples
+        - **Test Suite**: 8 new comprehensive test methods validating amplitude behaviour
+        - **Supported Platforms**: Ubuntu, macOS, Windows
+        - **Python Versions**: 3.10, 3.11, 3.12, 3.13, 3.14
+        
+        
+        ### 💪 Pull Requests 
+        
+        * Add Amplitude Control to Sine-Based Seasonal Index Generation by @chrimaho in https://github.com/data-science-extensions/synthetic-data-generators/pull/7
+        
+        
+        **Full Changelog**: https://github.com/data-science-extensions/synthetic-data-generators/compare/v1.2.0...v1.3.0
+        
+
+    ??? abstract "Updates"
+
+        * [`826ac1a`](https://github.com/data-science-extensions/synthetic-data-generators/commit/826ac1a90d9dac6ccd87d2fd94ea6d37b1926f09): Add amplitude parameter to sine seasonality generators<br>
+            - Introduces configurable `amplitude` parameter to `generate_sin_index()` and `generate_sin_covar_index()` methods to control oscillation range<br>
+            - Updates `generate_sin_index()` formula to `amplitude * sin(...) + (1 - amplitude)` ensuring wave oscillates between `(1 - 2*amplitude)` and `1` with default `amplitude=0.5` maintaining backwards compatibility (range 0 to 1)<br>
+            - Updates `generate_sin_covar_index()` to multiply sine wave by `amplitude` with default `amplitude=1.0` maintaining natural range (-1 to 1)<br>
+            - Exposes `amplitude` parameter through `generate_season_index()` method for both `'sin'` and `'sin_covar'` styles<br>
+            - Enhances documentation to clarify oscillation behaviour and provide examples of different amplitude values<br>
+            - Adds comprehensive test coverage validating custom amplitude values (0.0, 0.25, 0.3, 0.5, 1.0, 2.0) for both seasonality styles
+            (by [chrimaho](https://github.com/chrimaho))
+        * [`7cfb962`](https://github.com/data-science-extensions/synthetic-data-generators/commit/7cfb9625be7f1427709cfee77c6d4f93dfcba09a): Drop Python 3.9 support from CI/CD workflows<br>
+            - Removes Python 3.9 from the test matrix in both continuous integration and continuous deployment workflows<br>
+            - Aligns supported Python versions to `3.10`, `3.11`, `3.12`, `3.13`, and `3.14`<br>
+            - Reflects end of life for Python 3.9 or project policy to maintain newer Python versions only
+            (by [chrimaho](https://github.com/chrimaho))
+
+
 !!! info "v1.2.0"
 
     ## **v1.2.0 - Modernise Infrastructure and Enhance Type Safety**
@@ -478,6 +800,24 @@
 
     ??? abstract "Updates"
 
+        * [`512d273`](https://github.com/data-science-extensions/synthetic-data-generators/commit/512d273cb87b9e4d9c61215067aa39989a483450): Add automated changelog generation from GitHub releases<br>
+            - Fetch release tags and associated commits from GitHub API using PyGithub<br>
+            - Generate formatted changelog in Markdown with Material for MkDocs styling<br>
+            - Include release metadata (tag name, date, release notes) in collapsible sections<br>
+            - List commits between releases with author attribution and links<br>
+            - Filter out merge commits, version bumps, and changelog update commits<br>
+            - Require `GITHUB_TOKEN` and `REPOSITORY_NAME` environment variables<br>
+            - Output to `CHANGELOG.md` and automatically format with `blacken-docs`
+            (by [chrimaho](https://github.com/chrimaho))
+        * [`45848a1`](https://github.com/data-science-extensions/synthetic-data-generators/commit/45848a1df28ad2885ed3fd6f67477fce29c290e8): Add automated changelog generation from GitHub releases<br>
+            - Fetch release tags and associated commits from GitHub API using PyGithub<br>
+            - Generate formatted changelog in Markdown with Material for MkDocs styling<br>
+            - Include release metadata (tag name, date, release notes) in collapsible sections<br>
+            - List commits between releases with author attribution and links<br>
+            - Filter out merge commits, version bumps, and changelog update commits<br>
+            - Require `GITHUB_TOKEN` and `REPOSITORY_NAME` environment variables<br>
+            - Output to `CHANGELOG.md` and automatically format with `blacken-docs`
+            (by [chrimaho](https://github.com/chrimaho))
         * [`679a225`](https://github.com/data-science-extensions/synthetic-data-generators/commit/679a2255ace2f6b63163d6235b25f7f91107f403): Improve `README` markdown formatting and reference consistency<br>
             - Align table columns with consistent spacing and separators for better readability<br>
             - Consolidate markdown reference definitions by adding backtick-wrapped versions (`pip`, `pipenv`, `poetry`, `uv`) alongside existing plain versions<br>
